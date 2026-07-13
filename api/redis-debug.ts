@@ -26,15 +26,39 @@ export default async function handler(_req: VercelRequest, res: VercelResponse) 
   }
 
   try {
-    const testRes = await fetch(`${URL}/set/gitscore:test/1`, {
+    const testRes = await fetch(`${URL}/set/gitscore%3Atest/1`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${TOKEN}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({}),
     });
     result.testWriteStatus = testRes.status;
-    result.testWriteBody = (await testRes.text()).slice(0, 100);
+    result.testWriteBody = (await testRes.text()).slice(0, 200);
   } catch (err) {
     result.testWriteError = err instanceof Error ? err.message : 'unknown';
+  }
+
+  try {
+    const getRes = await fetch(`${URL}/get/gitscore%3Atest`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${TOKEN}` },
+      body: '{}',
+    });
+    result.testReadStatus = getRes.status;
+    result.testReadBody = (await getRes.text()).slice(0, 200);
+  } catch (err) {
+    result.testReadError = err instanceof Error ? err.message : 'unknown';
+  }
+
+  try {
+    const lbRes = await fetch(`${URL}/zrange/gitscore%3Aleaderboard/0/100/rev`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${TOKEN}` },
+      body: '{}',
+    });
+    result.leaderboardStatus = lbRes.status;
+    result.leaderboardBody = (await lbRes.text()).slice(0, 300);
+  } catch (err) {
+    result.leaderboardError = err instanceof Error ? err.message : 'unknown';
   }
 
   res.status(200).json(result);
