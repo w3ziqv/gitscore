@@ -1,0 +1,36 @@
+{
+  "name": "gitscore",
+  "version": "1.0.0",
+  "description": "GitHub profile analyzer with gamification, score, badges, and roast mode.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "dev:server": "tsx --import tsx/esm server/index.ts",
+    "dev:all": "concurrently \"npm run dev\" \"npm run dev:server\"",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^4.3.0",
+    "concurrently": "^9.1.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0",
+    "vite": "^6.0.0",
+    "vitest": "^3.2.0"
+  },
+  "license": "MIT",
+  "author": "Mateusz Szostak"
+}
