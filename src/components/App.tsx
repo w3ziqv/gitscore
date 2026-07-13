@@ -15,6 +15,7 @@ import RoastPanel from './RoastPanel.js';
 import CompareMode from './CompareMode.js';
 import LeaderboardView from './LeaderboardView.js';
 import RecentActivity from './RecentActivity.js';
+import { saveLocalLeaderboardEntry } from '../lib/localLeaderboard.js';
 import './App.css';
 
 type View = 'single' | 'compare' | 'leaderboard';
@@ -64,6 +65,7 @@ export default function App() {
       const data = (await res.json()) as ProfileAnalysis;
       setAnalysis(data);
       setGeneratedAtMs(Date.now());
+      saveLocalLeaderboardEntry(data);
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Something went wrong';
       setError(msg);

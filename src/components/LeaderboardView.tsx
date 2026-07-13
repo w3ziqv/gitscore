@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import type { LeaderboardEntry } from '../types.js';
+import { readLocalLeaderboard, mergeLeaderboards } from '../lib/localLeaderboard.js';
 
 interface Props {
   onSearch: (username: string) => void;
@@ -44,10 +45,13 @@ export default function LeaderboardView({ onSearch }: Props) {
         return res.json() as Promise<{ entries: LeaderboardEntry[]; total: number }>;
       })
       .then(data => {
-        if (!cancelled) setEntries(data.entries);
+        if (cancelled) return;
+        const local = readLocalLeaderboard();
+        setEntries(mergeLeaderboards(data.entries, local, 10));
       })
       .catch(() => {
-        if (!cancelled) setEntries([]);
+        if (cancelled) return;
+        setEntries(mergeLeaderboards([], readLocalLeaderboard(), 10));
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
