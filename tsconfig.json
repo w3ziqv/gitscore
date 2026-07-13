@@ -17,5 +17,5 @@
     "forceConsistentCasingInFileNames": true,
     "jsx": "react-jsx"
   },
-  "include": ["src", "tests", "server", "vite.config.ts", "vitest.config.ts"]
+  "include": ["src", "tests", "server", "api", "vite.config.ts", "vitest.config.ts"]
 }
