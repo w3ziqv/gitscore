@@ -1,7 +1,21 @@
-import { kv } from '@vercel/kv';
+import { Redis } from '@upstash/redis';
 import type { LeaderboardEntry, ScoreRank } from '../types.js';
 
 const LEADERBOARD_KEY = 'gitscore:leaderboard';
+const META_KEY = 'gitscore:leaderboard:meta';
+
+let cached: Redis | null = null;
+
+function redis(): Redis {
+  if (cached) return cached;
+  const url = process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  if (!url || !token) {
+    throw new Error('UPSTASH_REDIS_REST_URL or UPSTASH_REDIS_REST_TOKEN not set');
+  }
+  cached = new Redis({ url, token });
+  return cached;
+}
 
 export interface ProfileTelemetry {
   login: string;
@@ -27,8 +41,9 @@ export async function saveToLeaderboard(profile: ProfileTelemetry): Promise<void
     analyzedAtMs: Date.now(),
   };
 
-  await kv.zadd(LEADERBOARD_KEY, { score: profile.score, member: entry.login });
-  await kv.hset(`${LEADERBOARD_KEY}:meta`, { [profile.login]: entry });
+  const r = redis();
+  await r.zadd(LEADERBOARD_KEY, { score: profile.score, member: profile.login });
+  await r.hset(META_KEY, { [profile.login]: JSON.stringify(entry) });
 }
 
 export interface LeaderboardQueryResult {
@@ -37,25 +52,45 @@ export interface LeaderboardQueryResult {
 }
 
 export async function getLeaderboard(limit: number = 10): Promise<LeaderboardQueryResult> {
-  const rawMembers = await kv.zrange(LEADERBOARD_KEY, 0, limit - 1, { rev: true });
-  if (!rawMembers || rawMembers.length === 0) {
+  const r = redis();
+  const members = await r.zrange(LEADERBOARD_KEY, 0, limit, { rev: true });
+  if (!members || members.length === 0) {
     return { entries: [], total: 0 };
   }
 
-  const logins: string[] = rawMembers as string[];
-  const meta = await kv.hmget(`${LEADERBOARD_KEY}:meta`, ...logins);
+  const logins: string[] = members
+    .map(m => (typeof m === 'object' && m !== null && 'member' in m ? (m as { member: string }).member : String(m)))
+    .filter((v): v is string => typeof v === 'string');
 
-  const entries: LeaderboardEntry[] = [];
-  for (const login of logins) {
-    const m = meta?.[login] as LeaderboardEntry | undefined;
-    if (m) entries.push(m);
+  if (logins.length === 0) {
+    return { entries: [], total: 0 };
   }
 
-  const total = await kv.zcard(LEADERBOARD_KEY);
+  const rawMeta = await r.hgetall(META_KEY);
+  const entries: LeaderboardEntry[] = [];
+  for (const login of logins) {
+    const raw = rawMeta?.[login];
+    if (typeof raw === 'string') {
+      try {
+        const parsed = JSON.parse(raw) as LeaderboardEntry;
+        if (parsed && typeof parsed.login === 'string') entries.push(parsed);
+      } catch {
+        // malformed entry — skip
+      }
+    }
+  }
+
+  const total = await r.zcard(LEADERBOARD_KEY);
   return { entries, total: total ?? 0 };
 }
 
 export async function getEntry(login: string): Promise<LeaderboardEntry | null> {
-  const m = await kv.hget(`${LEADERBOARD_KEY}:meta`, login);
-  return (m as LeaderboardEntry | undefined) ?? null;
+  const r = redis();
+  const raw = await r.hget(META_KEY, login);
+  if (typeof raw !== 'string') return null;
+  try {
+    return JSON.parse(raw) as LeaderboardEntry;
+  } catch {
+    return null;
+  }
 }

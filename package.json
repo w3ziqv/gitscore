@@ -14,8 +14,8 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@upstash/redis": "^1.38.0",
     "@vercel/analytics": "^2.0.1",
-    "@vercel/kv": "^3.0.0",
     "cors": "^2.8.5",
     "express": "^4.21.0",
     "react": "^19.0.0",
