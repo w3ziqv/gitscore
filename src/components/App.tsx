@@ -1,11 +1,15 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import type { ProfileAnalysis, RoastResult } from '../types.js';
 import { getScoreRank } from '../lib/score.js';
+import { calculateFunStats } from '../lib/funStats.js';
 import SearchBar from './SearchBar.js';
 import ProfileCard from './ProfileCard.js';
 import ScoreDisplay from './ScoreDisplay.js';
 import LanguageChart from './LanguageChart.js';
 import Badges from './Badges.js';
+import AchievementProgress from './AchievementProgress.js';
+import FunStats from './FunStats.js';
+import ShareCard from './ShareCard.js';
 import RoastPanel from './RoastPanel.js';
 import CompareMode from './CompareMode.js';
 import './App.css';
@@ -62,6 +66,10 @@ export default function App() {
   }, [analysis, roast]);
 
   const rank = analysis ? getScoreRank(analysis.score.total) : null;
+  const funStats = useMemo(
+    () => (analysis ? calculateFunStats(analysis.user, analysis.repos, analysis.score) : []),
+    [analysis]
+  );
 
   return (
     <div className="app">
@@ -100,7 +108,10 @@ export default function App() {
               <ProfileCard analysis={analysis} />
               <ScoreDisplay score={analysis.score} rank={rank!} />
               <Badges badges={analysis.badges} />
+              <AchievementProgress badges={analysis.badges} user={analysis.user} repos={analysis.repos} />
+              <FunStats stats={funStats} />
               <LanguageChart languages={analysis.languages} />
+              <ShareCard analysis={analysis} />
 
               <div className="top-repos">
                 <h2>Top Repositories</h2>

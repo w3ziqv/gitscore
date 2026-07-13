@@ -45,8 +45,8 @@
   margin-top: 2rem;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 4px;
+  border-radius: var(--radius-md);
+  padding: 3px;
 }
 
 .view-toggle button {
@@ -56,7 +56,7 @@
   font-size: 0.875rem;
   font-weight: 500;
   letter-spacing: 0.01em;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
   transition: all var(--transition);
 }
 
@@ -101,7 +101,7 @@
   width: 100%;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
   color: var(--text);
   padding: 0.875rem 1rem 0.875rem 2.5rem;
   font-size: 1rem;
@@ -126,7 +126,7 @@
   font-size: 0.9375rem;
   font-weight: 500;
   letter-spacing: 0.01em;
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
   transition: opacity var(--transition);
 }
 
@@ -145,7 +145,7 @@
   border: 1px solid var(--orange-light);
   color: var(--orange);
   padding: 0.875rem 1.25rem;
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
   text-align: center;
   font-size: 0.9375rem;
 }
@@ -187,7 +187,7 @@
   font-weight: 500;
   font-family: var(--font-mono);
   border: 1px solid var(--border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
   transition: all var(--transition);
 }
 
@@ -209,14 +209,14 @@
   gap: 1.75rem;
   background: var(--bg);
   border: 1px solid var(--border);
-  border-radius: var(--radius-2xl);
+  border-radius: var(--radius-xl);
   padding: 2rem;
 }
 
 .avatar {
   width: 80px;
   height: 80px;
-  border-radius: 50%;
+  border-radius: var(--radius-md);
   flex-shrink: 0;
   border: 2px solid var(--border);
 }
@@ -284,7 +284,7 @@
   gap: 2.5rem;
   background: var(--bg);
   border: 1px solid var(--border);
-  border-radius: var(--radius-2xl);
+  border-radius: var(--radius-xl);
   padding: 2rem;
   align-items: center;
 }
@@ -372,7 +372,7 @@
 .badges-section {
   background: var(--bg);
   border: 1px solid var(--border);
-  border-radius: var(--radius-2xl);
+  border-radius: var(--radius-xl);
   padding: 2rem;
 }
 
@@ -396,7 +396,7 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem 0.875rem;
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-sm);
   font-size: 0.8125rem;
   font-weight: 500;
   border: 1px solid var(--border);
@@ -430,7 +430,7 @@
 .language-chart {
   background: var(--bg);
   border: 1px solid var(--border);
-  border-radius: var(--radius-2xl);
+  border-radius: var(--radius-xl);
   padding: 2rem;
 }
 
@@ -500,7 +500,7 @@
   display: block;
   background: var(--bg);
   border: 1px solid var(--border);
-  border-radius: var(--radius-xl);
+  border-radius: var(--radius-md);
   padding: 1.125rem 1.5rem;
   transition: all var(--transition);
 }
@@ -548,7 +548,7 @@
   font-size: 1rem;
   font-weight: 500;
   letter-spacing: 0.01em;
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
   transition: all var(--transition);
 }
 
@@ -560,7 +560,7 @@
 .roast-panel {
   background: var(--orange-50);
   border: 1px solid var(--orange-light);
-  border-radius: var(--radius-2xl);
+  border-radius: var(--radius-xl);
   padding: 2rem;
 }
 
@@ -608,6 +608,156 @@
   letter-spacing: -0.01em;
 }
 
+/* Fun Stats */
+.fun-stats {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 2rem;
+}
+
+.fun-stats h3 {
+  margin-bottom: 1.25rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.fun-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.fun-stat-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.fun-stat-emoji {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.fun-stat-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.fun-stat-value {
+  font-size: 1rem;
+  font-weight: 500;
+  font-family: var(--font-mono);
+  color: var(--text);
+}
+
+.fun-stat-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* Achievement Progress */
+.achievement-progress {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 2rem;
+}
+
+.achievement-progress h3 {
+  margin-bottom: 1.25rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.progress-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.progress-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.progress-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.progress-emoji {
+  font-size: 1rem;
+}
+
+.progress-name {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  flex: 1;
+}
+
+.progress-numbers {
+  font-size: 0.75rem;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.progress-bar-track {
+  height: 6px;
+  background: var(--surface-hover);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: var(--orange);
+  border-radius: 3px;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.all-earned {
+  color: var(--text-muted);
+  font-size: 0.9375rem;
+}
+
+/* Share Card */
+.share-card-section {
+  display: flex;
+  justify-content: center;
+}
+
+.share-btn {
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  padding: 0.75rem 1.75rem;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  border-radius: var(--radius-md);
+  transition: all var(--transition);
+}
+
+.share-btn:hover {
+  border-color: var(--text-muted);
+  background: var(--bg);
+  transform: translateY(-1px);
+}
+
 /* Compare Mode */
 .compare-form {
   display: flex;
@@ -619,7 +769,7 @@
   flex: 1;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
   color: var(--text);
   padding: 0.875rem 1rem;
   font-size: 1rem;
@@ -666,7 +816,7 @@
   background: var(--text);
   color: var(--bg);
   padding: 0.3rem 0.875rem;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
   font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.03em;
