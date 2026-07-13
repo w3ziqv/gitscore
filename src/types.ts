@@ -67,3 +67,45 @@ export interface RoastResult {
   lines: string[];
   overall: string;
 }
+
+export type ScoreRank = 'S+' | 'S' | 'A' | 'B' | 'C' | 'D' | 'F';
+
+export interface LeaderboardEntry {
+  login: string;
+  name: string | null;
+  avatar_url: string;
+  score: number;
+  rank: ScoreRank;
+  badgesEarned: number;
+  totalStars: number;
+  followers: number;
+  analyzedAtMs: number;
+}
+
+export type RecentActivityType =
+  | 'PushEvent'
+  | 'PullRequestEvent'
+  | 'IssuesEvent'
+  | 'CreateEvent'
+  | 'WatchEvent'
+  | 'Other';
+
+export interface RecentActivityItem {
+  type: RecentActivityType;
+  repo: string;
+  url: string;
+  createdAtIso: string;
+  summary: string;
+}
+
+export interface RecentActivity {
+  items: RecentActivityItem[];
+  totalInRange: number;
+}
+
+export interface Recommendation {
+  emoji: string;
+  title: string;
+  detail: string;
+  impactPoints: number;
+}

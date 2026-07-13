@@ -39,6 +39,8 @@
   --font-mono: 'Space Mono', 'SF Mono', 'Fira Code', Menlo, Consolas, monospace;
 
   --transition: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+
+  --dot-color: rgba(21, 21, 36, 0.04);
 }
 
 html, body {
@@ -51,6 +53,35 @@ html, body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
+  background-image: radial-gradient(var(--dot-color) 1px, transparent 1px);
+  background-size: 24px 24px;
+  background-position: 0 0;
+}
+
+/* Dark mode */
+[data-theme="dark"] {
+  --cream-50: #1a1a24;
+  --cream-100: #16161f;
+  --bg: #0c0c14;
+  --surface: #16161f;
+  --surface-hover: #262635;
+  --border: #262635;
+  --border-strong: #3a3a4a;
+
+  --text: #f5f5f0;
+  --text-secondary: #c0c0cc;
+  --text-muted: #8a8a98;
+
+  --orange: #ff5229;
+  --orange-medium: #ff8204;
+  --orange-light: #3a1a12;
+  --orange-50: #1f1010;
+
+  --blue: #4ba6f5;
+  --red: #ff6b6b;
+  --green: #5dd99a;
+
+  --dot-color: rgba(255, 255, 255, 0.035);
 }
 
 #root {

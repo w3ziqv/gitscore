@@ -7,6 +7,17 @@
   <meta name="theme-color" content="#fbfbf8">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <title>GitScore — GitHub Profile Analyzer</title>
+  <script>
+    (function () {
+      try {
+        var stored = localStorage.getItem('gitscore:theme');
+        var theme = stored || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', theme);
+      } catch (e) {
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+    })();
+  </script>
 </head>
 <body>
   <div id="root"></div>

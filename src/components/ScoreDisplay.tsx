@@ -1,11 +1,57 @@
+// ScoreDisplay.tsx — Animated score circle + breakdown
+
+import { useEffect, useRef, useState } from 'react';
 import type { ScoreBreakdown } from '../types.js';
 
 interface Props {
   score: ScoreBreakdown;
   rank: { rank: string; color: string };
+  generatedAtMs?: number;
 }
 
-export default function ScoreDisplay({ score, rank }: Props) {
+const ANIM_MS = 900;
+
+function easeOutCubic(t: number): number {
+  return 1 - Math.pow(1 - t, 3);
+}
+
+function formatTime(ms: number): string {
+  const d = new Date(ms);
+  const hh = String(d.getHours()).padStart(2, '0');
+  const mm = String(d.getMinutes()).padStart(2, '0');
+  return `${hh}:${mm}`;
+}
+
+export default function ScoreDisplay({ score, rank, generatedAtMs }: Props) {
+  const [displayed, setDisplayed] = useState(0);
+  const [done, setDone] = useState(false);
+  const rafRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    setDisplayed(0);
+    setDone(false);
+    const start = performance.now();
+    const target = score.total;
+
+    const tick = (now: number) => {
+      const elapsed = now - start;
+      const t = Math.min(elapsed / ANIM_MS, 1);
+      const eased = easeOutCubic(t);
+      setDisplayed(Math.round(target * eased));
+      if (t < 1) {
+        rafRef.current = requestAnimationFrame(tick);
+      } else {
+        setDisplayed(target);
+        setDone(true);
+      }
+    };
+
+    rafRef.current = requestAnimationFrame(tick);
+    return () => {
+      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+    };
+  }, [score.total]);
+
   const maxScore = 1000;
   const percentage = (score.total / maxScore) * 100;
   const circumference = 2 * Math.PI * 70;
@@ -23,7 +69,7 @@ export default function ScoreDisplay({ score, rank }: Props) {
     <div className="score-display">
       <div className="score-circle">
         <svg width="160" height="160" viewBox="0 0 160 160">
-          <circle cx="80" cy="80" r="70" fill="none" stroke="#ebe9e0" strokeWidth="8" />
+          <circle cx="80" cy="80" r="70" fill="none" stroke="var(--surface-hover)" strokeWidth="8" />
           <circle
             cx="80"
             cy="80"
@@ -38,12 +84,18 @@ export default function ScoreDisplay({ score, rank }: Props) {
           />
         </svg>
         <div className="score-text">
-          <span className="score-number" style={{ color: rank.color }}>
-            {score.total}
+          <span
+            className={`score-number ${done ? 'score-number-pop' : ''}`}
+            style={{ color: rank.color }}
+          >
+            {displayed}
           </span>
           <span className="score-rank" style={{ color: rank.color }}>
             Rank {rank.rank}
           </span>
+          {generatedAtMs !== undefined && (
+            <span className="score-generated">Generated · {formatTime(generatedAtMs)}</span>
+          )}
         </div>
       </div>
 

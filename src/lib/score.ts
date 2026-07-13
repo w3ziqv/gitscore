@@ -1,6 +1,6 @@
 // score.ts — Pure score calculation functions (no side-effects, fully testable)
 
-import type { GitHubUser, GitHubRepo, LanguageStat, ScoreBreakdown, Badge } from '../types.js';
+import type { GitHubUser, GitHubRepo, LanguageStat, ScoreBreakdown, Badge, ScoreRank } from '../types.js';
 
 export function calculateTotalStars(repos: GitHubRepo[]): number {
   return repos.reduce((sum, r) => sum + r.stargazers_count, 0);
@@ -59,7 +59,7 @@ export function calculateScore(user: GitHubUser, repos: GitHubRepo[], languages:
   };
 }
 
-export function getScoreRank(total: number): { rank: string; color: string } {
+export function getScoreRank(total: number): { rank: ScoreRank; color: string } {
   if (total >= 800) return { rank: 'S+', color: '#f85149' };
   if (total >= 650) return { rank: 'S', color: '#f0883e' };
   if (total >= 500) return { rank: 'A', color: '#ffa657' };
