@@ -2,6 +2,12 @@
 
 GitHub profile analyzer with gamification — get a hotness score, badges, language breakdown, and a roast. Compare two developers head-to-head.
 
+## Live Demo
+
+[gitscore-mu.vercel.app](https://gitscore-mu.vercel.app)
+
+![GitScore screenshot](screenshot.png)
+
 ## Features
 
 - **Hotness Score (0–1000)** — weighted algorithm based on repos, stars, followers, activity, and language diversity

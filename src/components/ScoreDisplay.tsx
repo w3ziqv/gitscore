@@ -12,18 +12,18 @@ export default function ScoreDisplay({ score, rank }: Props) {
   const dashOffset = circumference - (percentage / 100) * circumference;
 
   const breakdownItems = [
-    { label: 'Repos', value: score.repos, max: 200, color: '#58a6ff' },
-    { label: 'Stars', value: score.stars, max: 300, color: '#f0883e' },
-    { label: 'Followers', value: score.followers, max: 200, color: '#f85149' },
-    { label: 'Activity', value: score.activity, max: 150, color: '#3fb950' },
-    { label: 'Diversity', value: score.diversity, max: 150, color: '#a371f7' },
+    { label: 'Repos', value: score.repos, max: 200, color: '#ff5229' },
+    { label: 'Stars', value: score.stars, max: 300, color: '#ff8204' },
+    { label: 'Followers', value: score.followers, max: 200, color: '#0082e6' },
+    { label: 'Activity', value: score.activity, max: 150, color: '#44ba82' },
+    { label: 'Diversity', value: score.diversity, max: 150, color: '#151524' },
   ];
 
   return (
     <div className="score-display">
       <div className="score-circle">
         <svg width="160" height="160" viewBox="0 0 160 160">
-          <circle cx="80" cy="80" r="70" fill="none" stroke="#21262d" strokeWidth="8" />
+          <circle cx="80" cy="80" r="70" fill="none" stroke="#ebe9e0" strokeWidth="8" />
           <circle
             cx="80"
             cy="80"
