@@ -14,7 +14,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@upstash/redis": "^1.38.0",
+    "@neondatabase/serverless": "^0.10.0",
     "@vercel/analytics": "^2.0.1",
     "cors": "^2.8.5",
     "express": "^4.21.0",

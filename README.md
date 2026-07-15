@@ -31,7 +31,7 @@ GitHub profile analyzer with gamification — get a hotness score, badges, langu
 
 - **Frontend:** React 19 + TypeScript + Vite
 - **Backend:** Vercel serverless functions (Node.js runtime)
-- **Database:** Upstash Redis (leaderboard persistence) + localStorage fallback
+- **Database:** Neon Postgres (leaderboard persistence, serverless HTTP driver) + localStorage fallback
 - **External APIs:** GitHub REST API (users, repos, events)
 - **Testing:** Vitest (31 unit tests)
 - **CI:** GitHub Actions (typecheck + test + build)
@@ -76,7 +76,8 @@ gitscore/
 │   │   ├── funStats.ts            # Fun stats calculator
 │   │   ├── recommendations.ts    # Recommendation generator based on score headroom
 │   │   ├── activity.ts            # GitHub Events parser (pure)
-│   │   ├── leaderboard.ts         # Upstash Redis wrapper (sorted set + meta hash)
+│   │   ├── db.ts                  # Neon Postgres SQL client + idempotent schema init
+│   │   ├── leaderboard.ts         # Neon Postgres leaderboard wrapper (upsert + select)
 │   │   └── localLeaderboard.ts     # localStorage fallback + merge function
 │   ├── types.ts                   # Shared TypeScript types
 │   ├── main.tsx                   # React entry point
@@ -118,14 +119,21 @@ The frontend runs at `http://localhost:5173`. API calls in dev hit the Vercel se
 
 ### Optional: enable global leaderboard
 
-Clone `.env.example` (if present) or create `.env` with Upstash credentials:
+The leaderboard persists to a Neon Postgres database. Create one (free tier is enough):
 
-```
-UPSTASH_REDIS_REST_URL=https://your-db.upstash.io
-UPSTASH_REDIS_REST_TOKEN=your-token
-```
+1. Sign up at **[neon.tech](https://neon.tech)** and create a new project.
+2. Pick a region close to where your Vercel functions run (e.g. `AWS US-EAST-1` for Vercel's default `iad1`).
+3. Copy the **pooled connection string** from the Neon dashboard — it looks like
+   `postgres://user:password@ep-xxx-pooler.region.aws.neon.tech/neondb?sslmode=require`.
+4. Put it in `.env` locally (see `.env.example`):
 
-Without these, the leaderboard falls back to localStorage (per-browser) automatically. See the **Roadmap** note below for the global leaderboard status.
+   ```
+   DATABASE_URL=postgres://user:password@ep-xxx-pooler.region.aws.neon.tech/neondb?sslmode=require
+   ```
+
+5. In Vercel: **Project → Settings → Environment Variables →** add the same `DATABASE_URL`, then redeploy.
+
+The schema is created automatically on the first request — no migration step needed. Without `DATABASE_URL`, the leaderboard falls back to localStorage (per-browser) automatically.
 
 ### Production build
 
@@ -144,11 +152,11 @@ npm test
 
 | Method | Path | Description |
 |---|---|---|
-| GET | `/api/profile/:username` | Full profile analysis (score, badges, languages, repos) — also persists to leaderboard if Upstash configured |
+| GET | `/api/profile/:username` | Full profile analysis (score, badges, languages, repos) — also persists to leaderboard if Neon configured |
 | GET | `/api/roast/:username` | Roast for a given user |
 | GET | `/api/compare/:user1/:user2` | Side-by-side comparison of two users |
 | GET | `/api/activity/:username` | Recent activity (last ~30 GitHub events: pushes, PRs, issues) |
-| GET | `/api/leaderboard?limit=N` | Top N profiles by score (Upstash Redis if configured, otherwise empty) |
+| GET | `/api/leaderboard?limit=N` | Top N profiles by score (Neon Postgres if configured, otherwise empty) |
 | GET | `/api/health` | Health check |
 
 ## Badges
@@ -169,9 +177,9 @@ npm test
 
 ### Global leaderboard
 
-- **Status:** backend ready (`@upstash/redis` integration in `src/lib/leaderboard.ts`), but disabled at deploy time while Upstash token permissions are being sorted out.
-- **Current behavior:** every profile analyzed is saved to the browser's `localStorage`. The leaderboard tab shows these local entries merged with whatever the API returns (currently empty, because the Upstash token is read-only).
-- **To enable:** create an Upstash Redis database with read+write credentials, set `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` env vars in Vercel, then redeploy. The frontend already merges server + local entries, so no code change is needed once credentials are in place.
+- **Status:** backend ready (`@neondatabase/serverless` integration in `src/lib/leaderboard.ts` and `src/lib/db.ts`).
+- **Current behavior:** when `DATABASE_URL` is set, every profile analyzed is upserted into the `leaderboard` Postgres table and the leaderboard tab shows server entries merged with `localStorage`. Without `DATABASE_URL`, it falls back to localStorage-only.
+- **To enable:** follow the **Optional: enable global leaderboard** steps above — set `DATABASE_URL` in `.env` (local) and in Vercel environment variables, then redeploy. The schema is created on first request.
 - **Future:** add write of `analyzedAtMs`-based decay so the leaderboard favors recently active profiles, and a per-region leaderboard tab.
 
 ## Author
