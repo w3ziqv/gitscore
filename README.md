@@ -23,9 +23,14 @@ GitHub profile analyzer with gamification — get a hotness score, badges, langu
 - **Roast Mode** — humorous, auto-generated critique of any profile
 - **Head-to-Head** — compare two GitHub users side by side, with a winner badge
 - **Share Card** — download a PNG with your score, breakdown, and badges to share on social media
-- **Leaderboard** — top profiles saved locally (global leaderboard is a roadmap goal below)
+- **Leaderboard** — global ranking on Neon Postgres (was: localStorage only). Every analyzed profile is upserted server-side and visible to everyone, with `localStorage` as a per-browser fallback.
 - **Dark mode** — full theme toggle with localStorage persistence, respects `prefers-color-scheme`, no FOUC
 - **Mistral-style UI** — square corners, cream background, orange accent, mono numbers, subtle dot-grid pattern
+
+## What's New
+
+- **Global leaderboard is live** 🎉 — migrated from Upstash Redis to **Neon Postgres** so anyone visiting the site is ranked globally, not just in their own browser. Schema auto-creates on first request; only `DATABASE_URL` is needed (Vercel Storage → Neon marketplace does it in two clicks).
+- **Serverless-friendly DB driver** — `@neondatabase/serverless` HTTP driver plays well with Vercel functions; pooled connection string used by default.
 
 ## Tech Stack
 
@@ -177,10 +182,22 @@ npm test
 
 ### Global leaderboard
 
-- **Status:** backend ready (`@neondatabase/serverless` integration in `src/lib/leaderboard.ts` and `src/lib/db.ts`).
-- **Current behavior:** when `DATABASE_URL` is set, every profile analyzed is upserted into the `leaderboard` Postgres table and the leaderboard tab shows server entries merged with `localStorage`. Without `DATABASE_URL`, it falls back to localStorage-only.
-- **To enable:** follow the **Optional: enable global leaderboard** steps above — set `DATABASE_URL` in `.env` (local) and in Vercel environment variables, then redeploy. The schema is created on first request.
-- **Future:** add write of `analyzedAtMs`-based decay so the leaderboard favors recently active profiles, and a per-region leaderboard tab.
+- **Status:** ✅ **live** — Neon Postgres (`@neondatabase/serverless` in `src/lib/leaderboard.ts` + `src/lib/db.ts`).
+- **To enable in your own deploy:** follow the **Optional: enable global leaderboard** steps above — set `DATABASE_URL` in `.env` (local) and in Vercel environment variables, then redeploy. The schema is created on first request.
+- **Tuning:** add `ORDER BY score DESC, analyzed_at_ms DESC` tie-break and a `analyzedAtMs`-based decay so the leaderboard favors recently active profiles. Add a per-region leaderboard tab.
+
+### Planned features
+
+- **Embeddable SVG score badge** — `GET /api/badge/:username` returns an SVG score card (rank + color) that devs can drop into their GitHub README: `![GitScore](https://gitscore-mu.vercel.app/api/badge/w3ziqv)`. Distribution + backlinks in one endpoint.
+- **Profile score timeline** — store a daily snapshot of each user's score (new `score_history` table) and render a sparkline on the profile page: *"your score went +12 this week"*. We already persist `analyzed_at_ms` on upsert — extending to history rows is a small migration.
+- **Most-improved leaderboard** — a second tab ranking profiles by score *delta* over the last 7 / 30 days using `score_history`. Rewards streaks and momentum, not just raw totals.
+- **`npx gitscore <username>` CLI** — a tiny companion package that prints your score, rank, and a one-line roast to the terminal. Reuses the same `/api/profile` endpoint; fits GitScore's dev-tool audience perfectly.
+- **GitHub Action** — `uses: w3ziqv/gitscore-action@v1` comments the author's score + roast on their first PR to a repo. Great onboarding moment for OSS maintainers.
+- **Pinned friends leaderboard** — let logged-in users pin a small list of GitHub friends (localStorage + server) and see a private "squad" leaderboard next to the global one.
+- **Roast of the Day** — surface the funniest roasts generated that day, with a "daily roast" card on the homepage. Pure momentum feature, no auth required.
+- **Theme presets** — beyond light/dark: `synthwave`, `terminal-green`, `paper`. Dark mode already works; presets are just a CSS-variable swap.
+- **Multi-language roast** — roast in Polish / Spanish / German etc. Detected from `Accept-Language` to match the playful tone.
+- **Inbound webhook for score crosses** — `POST /api/webhook/threshold` so users can subscribe to "I finally hit rank A" events and post them to Discord / X automatically.
 
 ## Author
 
