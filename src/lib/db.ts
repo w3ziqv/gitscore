@@ -27,30 +27,32 @@ export function isDbConfigured(): boolean {
   return Boolean(process.env.DATABASE_URL);
 }
 
-const SCHEMA_SQL = `
-  CREATE TABLE IF NOT EXISTS leaderboard (
-    login            TEXT PRIMARY KEY,
-    name             TEXT,
-    avatar_url       TEXT NOT NULL,
-    score            INTEGER NOT NULL,
-    rank             TEXT NOT NULL,
-    badges_earned    INTEGER NOT NULL,
-    total_stars      INTEGER NOT NULL,
-    followers        INTEGER NOT NULL,
-    analyzed_at_ms   BIGINT NOT NULL
-  );
-  CREATE INDEX IF NOT EXISTS leaderboard_score_idx ON leaderboard (score DESC);
-`;
-
 let schemaInitialized = false;
 
 /**
  * Idempotently ensures the leaderboard table + index exist.
  * Cheap to call on every cold start because of `IF NOT EXISTS`.
+ * The Neon HTTP driver does not support multi-statement prepared statements,
+ * so DDL is split across separate `sql` calls.
  */
 export async function ensureSchema(): Promise<void> {
   if (schemaInitialized) return;
   const s = sql();
-  await s(SCHEMA_SQL);
+  await s`
+    CREATE TABLE IF NOT EXISTS leaderboard (
+      login            TEXT PRIMARY KEY,
+      name             TEXT,
+      avatar_url       TEXT NOT NULL,
+      score            INTEGER NOT NULL,
+      rank             TEXT NOT NULL,
+      badges_earned    INTEGER NOT NULL,
+      total_stars      INTEGER NOT NULL,
+      followers        INTEGER NOT NULL,
+      analyzed_at_ms   BIGINT NOT NULL
+    )
+  `;
+  await s`
+    CREATE INDEX IF NOT EXISTS leaderboard_score_idx ON leaderboard (score DESC)
+  `;
   schemaInitialized = true;
 }
