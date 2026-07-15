@@ -47,7 +47,6 @@ interface LeaderboardRow {
  * localStorage fallback remains the source of truth.
  */
 export async function saveToLeaderboard(profile: ProfileTelemetry): Promise<void> {
-  console.log('saveToLeaderboard: isDbConfigured=', isDbConfigured(), 'DATABASE_URL present=', Boolean(process.env.DATABASE_URL), 'len=', process.env.DATABASE_URL?.length ?? 0, 'prefix=', process.env.DATABASE_URL?.slice(0, 30) ?? '(none)');
   if (!isDbConfigured()) return;
 
   try {
@@ -84,7 +83,6 @@ export async function saveToLeaderboard(profile: ProfileTelemetry): Promise<void
  * frontend merge logic collapses to the localStorage-only path.
  */
 export async function getLeaderboard(limit: number = 10): Promise<LeaderboardQueryResult> {
-  console.log('getLeaderboard: isDbConfigured=', isDbConfigured(), 'DATABASE_URL present=', Boolean(process.env.DATABASE_URL));
   if (!isDbConfigured()) {
     return { entries: [], total: 0 };
   }
