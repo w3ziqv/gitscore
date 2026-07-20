@@ -1,0 +1,21 @@
+name: 'GitScore PR Comment'
+description: 'Comment the PR author GitScore ranking + roast on their first PR. Built on top of gitscore-mu.vercel.app.'
+author: 'w3ziqv'
+branding:
+  icon: 'bar-chart-2'
+  color: 'orange'
+inputs:
+  github-token:
+    description: 'GitHub token used to post the comment (usually secrets.GITHUB_TOKEN)'
+    required: true
+  api-origin:
+    description: 'GitScore API origin (default: https://gitscore-mu.vercel.app)'
+    required: false
+    default: 'https://gitscore-mu.vercel.app'
+  post-on-first-pr-only:
+    description: 'Post the comment only on the author first PR ever (default: true)'
+    required: false
+    default: 'true'
+runs:
+  using: 'node20'
+  main: 'dist/index.js'

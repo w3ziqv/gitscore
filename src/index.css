@@ -7,13 +7,15 @@
 }
 
 :root {
+  /* Hard Mistral — every radius is 0. We keep --radius-sm at 0 too;
+     1px is used inside bar tracks via direct CSS where semantic. */
   --cream-50: #fafaf4;
   --cream-100: #f2f1e8;
   --bg: #fbfbf8;
   --surface: #f5f4ef;
   --surface-hover: #ebe9e0;
-  --border: #e4e3de;
-  --border-strong: #c9c9c4;
+  --border: #cdcac2;
+  --border-strong: #151524;
 
   --text: #151524;
   --text-secondary: #343446;
@@ -28,19 +30,25 @@
   --red: #e51300;
   --green: #44ba82;
 
-  --radius-sm: 0.125rem;
-  --radius-md: 0.25rem;
-  --radius-lg: 0.375rem;
-  --radius-xl: 0.5rem;
-  --radius-2xl: 0.625rem;
-  --radius-3xl: 0.75rem;
+  /* Hard Mistral radii — flat everywhere */
+  --radius-sm: 0;
+  --radius-md: 0;
+  --radius-lg: 0;
+  --radius-xl: 0;
+  --radius-2xl: 0;
+  --radius-3xl: 0;
+
+  /* Neobrutal hard shadow used on primary actions */
+  --shadow-block: 3px 3px 0 var(--text);
+  --shadow-block-orange: 3px 3px 0 var(--orange);
 
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-mono: 'Space Mono', 'SF Mono', 'Fira Code', Menlo, Consolas, monospace;
 
-  --transition: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition: 0.12s steps(2, end);
 
-  --dot-color: rgba(21, 21, 36, 0.04);
+  /* Pixel grid — denser for harder pixel feel */
+  --dot-color: rgba(21, 21, 36, 0.07);
 }
 
 html, body {
@@ -53,20 +61,31 @@ html, body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
-  background-image: radial-gradient(var(--dot-color) 1px, transparent 1px);
-  background-size: 24px 24px;
+  background-image: linear-gradient(var(--dot-color) 1px, transparent 1px), linear-gradient(90deg, var(--dot-color) 1px, transparent 1px);
+  background-size: 16px 16px;
   background-position: 0 0;
+  image-rendering: crisp-edges;
 }
 
-/* Dark mode */
+/* Crisp pixel rendering for avatars / icons */
+img {
+  image-rendering: auto;
+}
+
+img.avatar, img.lb-avatar, .pixelated {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+/* Dark mode (default dark) */
 [data-theme="dark"] {
   --cream-50: #1a1a24;
   --cream-100: #16161f;
   --bg: #0c0c14;
   --surface: #16161f;
   --surface-hover: #262635;
-  --border: #262635;
-  --border-strong: #3a3a4a;
+  --border: #3a3a4a;
+  --border-strong: #f5f5f0;
 
   --text: #f5f5f0;
   --text-secondary: #c0c0cc;
@@ -81,7 +100,77 @@ html, body {
   --red: #ff6b6b;
   --green: #5dd99a;
 
-  --dot-color: rgba(255, 255, 255, 0.035);
+  --shadow-block: 3px 3px 0 var(--border-strong);
+  --shadow-block-orange: 3px 3px 0 var(--orange);
+
+  --dot-color: rgba(255, 255, 255, 0.05);
+}
+
+/* === Theme presets (F2) === */
+/* synthwave */
+[data-theme="synthwave"] {
+  --bg: #1b0a3a;
+  --surface: #2a0e57;
+  --surface-hover: #3a1a78;
+  --border: #ff3ec9;
+  --border-strong: #ff61f5;
+  --text: #fee5ff;
+  --text-secondary: #cf8de8;
+  --text-muted: #8a64a8;
+  --orange: #ff1f8a;
+  --orange-medium: #ff5fa8;
+  --orange-light: #ff8fc8;
+  --orange-50: #2a0e57;
+  --blue: #00f0ff;
+  --red: #ff4470;
+  --green: #6affb6;
+  --shadow-block: 3px 3px 0 #ff61f5;
+  --shadow-block-orange: 3px 3px 0 #00f0ff;
+  --dot-color: rgba(255, 97, 245, 0.10);
+}
+
+/* terminal-green */
+[data-theme="terminal-green"] {
+  --bg: #02110a;
+  --surface: #04210f;
+  --surface-hover: #08321a;
+  --border: #1f7a3a;
+  --border-strong: #3affaa;
+  --text: #c9ffe4;
+  --text-secondary: #95e4b8;
+  --text-muted: #4f9670;
+  --orange: #3affaa;
+  --orange-medium: #6affc8;
+  --orange-light: #0a3a24;
+  --orange-50: #04210f;
+  --blue: #2ad9ff;
+  --red: #ff5070;
+  --green: #3affaa;
+  --shadow-block: 3px 3px 0 #3affaa;
+  --shadow-block-orange: 3px 3px 0 #ff5070;
+  --dot-color: rgba(58, 255, 170, 0.08);
+}
+
+/* paper */
+[data-theme="paper"] {
+  --bg: #ede5d2;
+  --surface: #f3eddc;
+  --surface-hover: #e0d6ba;
+  --border: #3a2f1f;
+  --border-strong: #1f1a10;
+  --text: #1f1a10;
+  --text-secondary: #3a2f1f;
+  --text-muted: #6a5a3f;
+  --orange: #b83010;
+  --orange-medium: #c86020;
+  --orange-light: #e8c090;
+  --orange-50: #f3e8d4;
+  --blue: #1f4a9c;
+  --red: #9c1f1f;
+  --green: #1f7c4f;
+  --shadow-block: 3px 3px 0 #1f1a10;
+  --shadow-block-orange: 3px 3px 0 #b83010;
+  --dot-color: rgba(31, 26, 16, 0.10);
 }
 
 #root {
@@ -102,10 +191,24 @@ button {
   font-family: var(--font-sans);
   cursor: pointer;
   border: none;
-  border-radius: var(--radius-md);
-  transition: all var(--transition);
+  border-radius: 0;
+  transition: transform var(--transition), box-shadow var(--transition), background var(--transition), color var(--transition);
 }
 
 input {
   font-family: var(--font-sans);
+  border-radius: 0;
+}
+
+/* Hard outline focus everywhere */
+:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
+}
+
+[data-theme="dark"]:root:focus-visible,
+[data-theme="synthwave"]:focus-visible,
+[data-theme="terminal-green"]:focus-visible,
+[data-theme="paper"]:focus-visible {
+  outline-color: var(--text);
 }

@@ -9,3 +9,9 @@ Thumbs.db
 .idea/
 .env
 .env.local
+
+# OpenCode assistant private working directory
+.omo/
+
+# Local plan scratchpad — README.md is the public record
+PLAN.md

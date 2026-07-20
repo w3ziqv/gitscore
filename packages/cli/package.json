@@ -1,0 +1,21 @@
+{
+  "name": "gitscore-cli",
+  "version": "0.1.0",
+  "description": "Tiny companion CLI that prints your GitScore, rank, and a one-line roast.",
+  "type": "module",
+  "bin": {
+    "gitscore": "bin/gitscore.js"
+  },
+  "files": [
+    "bin/gitscore.js"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/w3ziqv/gitscore.git"
+  },
+  "license": "MIT",
+  "author": "Mateusz Szostak <w3ziqv>"
+}

@@ -1,8 +1,16 @@
-// api/roast/[username].ts — GET /api/roast/:username
+// api/roast/[username].ts — GET /api/roast/:username?lang=pl
+//
+// Locale resolution:
+//   1. ?lang= query param (e.g. `&lang=pl`)
+//   2. Accept-Language header
+//   3. 'en' fallback
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { fetchProfile, sendError } from '../_lib/github.js';
-import { generateRoast } from '../../src/lib/roast.js';
+import {
+  generateRoastWithLang,
+  parseAcceptLanguage,
+} from '../../src/lib/roast.js';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'GET') {
@@ -16,10 +24,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return;
   }
 
+  const langQ = typeof req.query?.lang === 'string' ? req.query.lang : '';
+  const acceptLang = req.headers['accept-language'];
+  const lang = langQ || parseAcceptLanguage(
+    Array.isArray(acceptLang) ? acceptLang[0] : acceptLang,
+  );
+
   try {
     const analysis = await fetchProfile(username);
-    const roast = generateRoast(analysis.user, analysis.repos, analysis.score);
-    res.status(200).json(roast);
+    const roast = generateRoastWithLang(analysis.user, analysis.repos, analysis.score, lang);
+    res.status(200).json({ ...roast, lang });
   } catch (error) {
     sendError(res, error);
   }

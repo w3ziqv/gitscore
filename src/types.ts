@@ -82,6 +82,11 @@ export interface LeaderboardEntry {
   analyzedAtMs: number;
 }
 
+// F6: leaderboard entry plus score-delta over a window (e.g. +52 / -8 last 7d).
+export interface ImprovedLeaderboardEntry extends LeaderboardEntry {
+  delta: number;
+}
+
 export type RecentActivityType =
   | 'PushEvent'
   | 'PullRequestEvent'

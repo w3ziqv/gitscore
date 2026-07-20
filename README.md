@@ -24,11 +24,30 @@ GitHub profile analyzer with gamification — get a hotness score, badges, langu
 - **Head-to-Head** — compare two GitHub users side by side, with a winner badge
 - **Share Card** — download a PNG with your score, breakdown, and badges to share on social media
 - **Leaderboard** — global ranking on Neon Postgres (was: localStorage only). Every analyzed profile is upserted server-side and visible to everyone, with `localStorage` as a per-browser fallback.
-- **Dark mode** — full theme toggle with localStorage persistence, respects `prefers-color-scheme`, no FOUC
-- **Mistral-style UI** — square corners, cream background, orange accent, mono numbers, subtle dot-grid pattern
+- **Most-improved leaderboard tab** — second tab ranking profiles by score *delta* over the last 7 / 30 days using `score_history`. Rewards streaks and momentum, not just raw totals.
+- **Squad leaderboard** — pin a small list of GitHub friends (localStorage) and see a private "squad" leaderboard next to the global one.
+- **Dark mode + theme presets** — full theme toggle with localStorage persistence, respects `prefers-color-scheme`, no FOUC. Presets: `light` / `dark` / `synthwave` / `terminal-green` / `paper`.
+- **Hard Mistral UI** — fully square corners, neobrutal hard-offset shadows, pixel-grid background (16px), blocky pixel-segment progress bars, square score block, pixel-G favicon, crisp-edge image rendering.
+- **Embeddable SVG score badge** — `GET /api/badge/:username` returns a 220×44 SVG you can drop into any README.
+- **Profile score timeline** — daily score snapshot per login (auto-migrating `score_history` table) + inline sparkline on the profile page showing the last 14 days.
+- **Multi-language roast** — roast in Polish / Spanish / German / French / English, detected from `Accept-Language` (or `?lang=`)- **Roast of the Day** — homepage card surfacing the funniest roast among profiles analyzed in the last 24h.
+- **Inbound webhook for score crosses** — `POST /api/webhook/threshold` to subscribe to "I finally hit rank A" events. The profile endpoint fires subscribers on each save.
+- **`npx @gitscore/cli <username>`** — tiny companion CLI printing score / rank / a one-line roast with ANSI color. No deps, ESM, single file.
+- **GitHub Action skeleton** — `action/action.yml` + `action/index.js` proof: posts the PR author's GitScore comment on their first PR.
 
 ## What's New
 
+- **Hard Mistral UI overhaul** — every radius is 0; hard-offset shadows replace soft glows; score circle became a square score block; language dots + progress bars are pixel-segmented; web font kept (Inter + Space Mono) but all uppercase labels go through the mono face. New `favicon.svg` is a 16×16 pixel-G.
+- **5 theme presets (F2)** — `light` / `dark` / `synthwave` / `terminal-green` / `paper`. `index.html` inline pre-React script accepts all five to keep no-FOUC.
+- **Embeddable SVG badge (F1)** — `![GitScore](https://gitscore-mu.vercel.app/api/badge/w3ziqv)` works out of the box. The frontend has an "Embed badge" button that copies the markdown.
+- **Score timeline (F5)** — `score_history` table auto-creates on first request; profile endpoint writes one row per UTC day per login. `GET /api/score-history/:username?days=14` returns `{ history: number[] }`; the profile card renders an inline sparkline when history ≥ 2 points.
+- **Most-improved leaderboard (F6)** — `GET /api/leaderboard?tab=improved&window=7` ranks by score-delta derived from `score_history`. New "Most improved" tab in the UI with a 7d / 30d toggle.
+- **Squad leaderboard (F7)** — pin GitHub friends in localStorage and see them ranked alongside the global board.
+- **Multi-language roast (F3)** — roast in EN/PL/ES/DE/FR. `parseAcceptLanguage` + `?lang=` param.
+- **Roast of the Day (F4)** — `GET /api/roast-of-the-day` picks the funniest roast from the last 24h (falls back to deterministic rotation of the global leaderboard if no recent roasts).
+- **Webhook subscriptions (F10)** — `POST /api/webhook/threshold` with `Authorization: Bearer <≥32-char token>` registers a subscriber; the profile endpoint fires it on each save when the score crosses the threshold (24h de-dupe via `fired_at_ms`).
+- **`npx @gitscore/cli` (F8)** — companion CLI in `packages/cli`. `node packages/cli/bin/gitscore.js torvalds`.
+- **GitHub Action skeleton (F9)** — `action/action.yml` + `action/index.js`. Bundle with `npx @vercel/ncc build` before publishing.
 - **Global leaderboard is live** 🎉 — migrated from Upstash Redis to **Neon Postgres** so anyone visiting the site is ranked globally, not just in their own browser. Schema auto-creates on first request; only `DATABASE_URL` is needed (Vercel Storage → Neon marketplace does it in two clicks).
 - **Serverless-friendly DB driver** — `@neondatabase/serverless` HTTP driver plays well with Vercel functions; pooled connection string used by default.
 
@@ -38,7 +57,7 @@ GitHub profile analyzer with gamification — get a hotness score, badges, langu
 - **Backend:** Vercel serverless functions (Node.js runtime)
 - **Database:** Neon Postgres (leaderboard persistence, serverless HTTP driver) + localStorage fallback
 - **External APIs:** GitHub REST API (users, repos, events)
-- **Testing:** Vitest (31 unit tests)
+- **Testing:** Vitest (69 unit tests across score, roast, multi-language roast, badge SVG, squad, score-history helpers)
 - **CI:** GitHub Actions (typecheck + test + build)
 
 ## Score Algorithm
@@ -157,11 +176,15 @@ npm test
 
 | Method | Path | Description |
 |---|---|---|
-| GET | `/api/profile/:username` | Full profile analysis (score, badges, languages, repos) — also persists to leaderboard if Neon configured |
-| GET | `/api/roast/:username` | Roast for a given user |
+| GET | `/api/profile/:username` | Full profile analysis (score, badges, languages, repos) — also persists to leaderboard + score_history + fires threshold webhooks if Neon configured |
+| GET | `/api/roast/:username?lang=pl` | Roast for a given user (EN/PL/ES/DE/FR via `?lang=` or `Accept-Language`) |
 | GET | `/api/compare/:user1/:user2` | Side-by-side comparison of two users |
 | GET | `/api/activity/:username` | Recent activity (last ~30 GitHub events: pushes, PRs, issues) |
-| GET | `/api/leaderboard?limit=N` | Top N profiles by score (Neon Postgres if configured, otherwise empty) |
+| GET | `/api/badge/:username?theme=dark` | Embeddable 220×44 SVG score badge (rank + score + login, Hard Mistral pixel) for README embeds |
+| GET | `/api/score-history/:username?days=14` | Score sparkline points (oldest→newest) — `{ history: number[] }` |
+| GET | `/api/roast-of-the-day` | Today's funniest roast among recently analyzed profiles |
+| GET | `/api/leaderboard?limit=N&tab=improved&window=7` | Top N profiles by score (default `tab=global`) or by score-delta (`tab=improved&window=7\|30`) |
+| POST | `/api/webhook/threshold` | Subscribe to score-cross events: body `{ login, threshold, webhook_url }` + `Authorization: Bearer <≥32-char token>` |
 | GET | `/api/health` | Health check |
 
 ## Badges
@@ -186,18 +209,27 @@ npm test
 - **To enable in your own deploy:** follow the **Optional: enable global leaderboard** steps above — set `DATABASE_URL` in `.env` (local) and in Vercel environment variables, then redeploy. The schema is created on first request.
 - **Tuning:** add `ORDER BY score DESC, analyzed_at_ms DESC` tie-break and a `analyzedAtMs`-based decay so the leaderboard favors recently active profiles. Add a per-region leaderboard tab.
 
-### Planned features
+### Shipped (was Planned)
 
-- **Embeddable SVG score badge** — `GET /api/badge/:username` returns an SVG score card (rank + color) that devs can drop into their GitHub README: `![GitScore](https://gitscore-mu.vercel.app/api/badge/w3ziqv)`. Distribution + backlinks in one endpoint.
-- **Profile score timeline** — store a daily snapshot of each user's score (new `score_history` table) and render a sparkline on the profile page: *"your score went +12 this week"*. We already persist `analyzed_at_ms` on upsert — extending to history rows is a small migration.
-- **Most-improved leaderboard** — a second tab ranking profiles by score *delta* over the last 7 / 30 days using `score_history`. Rewards streaks and momentum, not just raw totals.
-- **`npx gitscore <username>` CLI** — a tiny companion package that prints your score, rank, and a one-line roast to the terminal. Reuses the same `/api/profile` endpoint; fits GitScore's dev-tool audience perfectly.
-- **GitHub Action** — `uses: w3ziqv/gitscore-action@v1` comments the author's score + roast on their first PR to a repo. Great onboarding moment for OSS maintainers.
-- **Pinned friends leaderboard** — let logged-in users pin a small list of GitHub friends (localStorage + server) and see a private "squad" leaderboard next to the global one.
-- **Roast of the Day** — surface the funniest roasts generated that day, with a "daily roast" card on the homepage. Pure momentum feature, no auth required.
-- **Theme presets** — beyond light/dark: `synthwave`, `terminal-green`, `paper`. Dark mode already works; presets are just a CSS-variable swap.
-- **Multi-language roast** — roast in Polish / Spanish / German etc. Detected from `Accept-Language` to match the playful tone.
-- **Inbound webhook for score crosses** — `POST /api/webhook/threshold` so users can subscribe to "I finally hit rank A" events and post them to Discord / X automatically.
+All previously-planned features from the README are now implemented:
+
+- ✅ **Embeddable SVG score badge** — `GET /api/badge/:username`
+- ✅ **Profile score timeline** — `score_history` table + sparkline component + `GET /api/score-history/:username`
+- ✅ **Most-improved leaderboard** — `GET /api/leaderboard?tab=improved&window=7|30` + UI tab
+- ✅ **`npx @gitscore/cli <username>` CLI** — `packages/cli/bin/gitscore.js`
+- ✅ **GitHub Action** — `action/action.yml` + `action/index.js` (proof — bundle with `ncc` before publishing)
+- ✅ **Pinned friends leaderboard** — `src/lib/squad.ts` + UI "Squad" tab
+- ✅ **Roast of the Day** — `GET /api/roast-of-the-day` + homepage card
+- ✅ **Theme presets** — synthwave / terminal-green / paper via ThemePicker dropdown
+- ✅ **Multi-language roast** — EN/PL/ES/DE/FR via `?lang=` or `Accept-Language`
+- ✅ **Inbound webhook for score crosses** — `POST /api/webhook/threshold` with bearer token auth
+
+### Still planned
+
+- Per-region leaderboard tab (DB sharding by region header)
+- Action bundled + published as `w3ziqv/gitscore-action@v1` on the GitHub marketplace
+- More roast locales (jp / zh / it / pt / ru)
+- Vercel Cron re-check of threshold subs (currently fires only on profile saves)
 
 ## Author
 

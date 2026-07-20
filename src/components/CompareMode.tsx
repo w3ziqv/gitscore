@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import type { ProfileAnalysis } from '../types.js';
 import { getScoreRank } from '../lib/score.js';
+import { apiJson, apiErrorMessage } from '../lib/api.js';
 import ProfileCard from './ProfileCard.js';
 import ScoreDisplay from './ScoreDisplay.js';
 import Badges from './Badges.js';
@@ -25,15 +26,14 @@ export default function CompareMode() {
     setError(null);
 
     try {
-      const res = await fetch(`/api/compare/${encodeURIComponent(user1.trim())}/${encodeURIComponent(user2.trim())}`);
-      if (!res.ok) {
-        const data = await res.json() as { error: string };
-        throw new Error(data.error);
-      }
-      const data = (await res.json()) as CompareResult;
+      const data = await apiJson<CompareResult>(
+        `/api/compare/${encodeURIComponent(user1.trim())}/${encodeURIComponent(user2.trim())}`,
+        undefined,
+        { unreachableHint: 'API unreachable — run `npm run dev:all`, `vercel dev`, or use the Vercel deployment.' },
+      );
       setResult(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong');
+      setError(apiErrorMessage(err));
       setResult(null);
     } finally {
       setLoading(false);

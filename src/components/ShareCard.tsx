@@ -1,6 +1,6 @@
-// ShareCard.tsx — Canvas-based shareable image with score, badges, and username
+// ShareCard.tsx — Canvas-based shareable image + embeddable SVG badge link (F1).
 
-import { useRef, useCallback } from 'react';
+import { useRef, useCallback, useState } from 'react';
 import type { ProfileAnalysis } from '../types.js';
 import { getScoreRank } from '../lib/score.js';
 
@@ -31,6 +31,39 @@ function getThemeColors(): ThemeColors {
       footer: '#5a5a6a',
     };
   }
+  if (theme === 'synthwave') {
+    return {
+      bg: '#1b0a3a',
+      text: '#fee5ff',
+      textMuted: '#8a64a8',
+      textSecondary: '#cf8de8',
+      barTrack: '#3a1a78',
+      badgeBg: '#2a0e57',
+      footer: '#5a4080',
+    };
+  }
+  if (theme === 'terminal-green') {
+    return {
+      bg: '#02110a',
+      text: '#c9ffe4',
+      textMuted: '#4f9670',
+      textSecondary: '#95e4b8',
+      barTrack: '#08321a',
+      badgeBg: '#04210f',
+      footer: '#1f7a3a',
+    };
+  }
+  if (theme === 'paper') {
+    return {
+      bg: '#ede5d2',
+      text: '#1f1a10',
+      textMuted: '#6a5a3f',
+      textSecondary: '#3a2f1f',
+      barTrack: '#e0d6ba',
+      badgeBg: '#f3eddc',
+      footer: '#3a2f1f',
+    };
+  }
   return {
     bg: '#fbfbf8',
     text: '#151524',
@@ -45,6 +78,7 @@ function getThemeColors(): ThemeColors {
 export default function ShareCard({ analysis }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const linkRef = useRef<HTMLAnchorElement>(null);
+  const [copied, setCopied] = useState(false);
 
   const drawCard = useCallback(() => {
     const canvas = canvasRef.current;
@@ -63,11 +97,12 @@ export default function ShareCard({ analysis }: Props) {
     ctx.fillStyle = c.bg;
     ctx.fillRect(0, 0, W, H);
 
+    // Hard Mistral: 8px block stripe instead of 8px soft column.
     ctx.fillStyle = '#ff5229';
     ctx.fillRect(0, 0, 8, H);
 
     ctx.fillStyle = c.text;
-    ctx.font = '500 32px "Space Mono", monospace';
+    ctx.font = '700 32px "Space Mono", monospace';
     ctx.textAlign = 'left';
     ctx.fillText('# GitScore', 60, 80);
 
@@ -166,10 +201,30 @@ export default function ShareCard({ analysis }: Props) {
     link.click();
   }, [drawCard, analysis]);
 
+  const handleEmbedCopy = useCallback(async () => {
+    const url = `${window.location.origin}/api/badge/${encodeURIComponent(analysis.user.login)}`;
+    const md = `![GitScore](${url})`;
+    try {
+      await navigator.clipboard.writeText(md);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1800);
+    } catch {
+      // Clipboard may be blocked — silently no-op; user can copy the file from a fallback.
+      setCopied(false);
+    }
+  }, [analysis.user.login]);
+
   return (
     <div className="share-card-section">
       <button className="share-btn" onClick={handleDownload}>
         Download Share Card
+      </button>
+      <button
+        className={`embed-btn ${copied ? 'copied' : ''}`}
+        onClick={handleEmbedCopy}
+        title={`![GitScore](${window.location.origin}/api/badge/${analysis.user.login})`}
+      >
+        {copied ? 'Copied!' : 'Embed badge'}
       </button>
       <canvas ref={canvasRef} style={{ display: 'none' }} />
       <a ref={linkRef} style={{ display: 'none' }} />

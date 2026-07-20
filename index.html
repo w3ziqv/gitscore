@@ -11,7 +11,10 @@
     (function () {
       try {
         var stored = localStorage.getItem('gitscore:theme');
-        var theme = stored || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        var VALID = ['light', 'dark', 'synthwave', 'terminal-green', 'paper'];
+        var theme = stored && VALID.indexOf(stored) !== -1
+          ? stored
+          : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
         document.documentElement.setAttribute('data-theme', theme);
       } catch (e) {
         document.documentElement.setAttribute('data-theme', 'light');

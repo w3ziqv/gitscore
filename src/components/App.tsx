@@ -15,16 +15,20 @@ import RoastPanel from './RoastPanel.js';
 import CompareMode from './CompareMode.js';
 import LeaderboardView from './LeaderboardView.js';
 import RecentActivity from './RecentActivity.js';
+import RoastOfDay from './RoastOfDay.js';
+import ThemePicker, { type ThemeName } from './ThemePicker.js';
 import { saveLocalLeaderboardEntry } from '../lib/localLeaderboard.js';
+import { apiJson, apiErrorMessage, ApiError } from '../lib/api.js';
 import './App.css';
 
 type View = 'single' | 'compare' | 'leaderboard';
-type Theme = 'light' | 'dark';
 
-function getInitialTheme(): Theme {
+const VALID_THEMES: ThemeName[] = ['light', 'dark', 'synthwave', 'terminal-green', 'paper'];
+
+function getInitialTheme(): ThemeName {
   if (typeof window === 'undefined') return 'light';
   const stored = localStorage.getItem('gitscore:theme');
-  if (stored === 'dark' || stored === 'light') return stored;
+  if (stored && (VALID_THEMES as string[]).includes(stored)) return stored as ThemeName;
   return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 }
 
@@ -36,18 +40,16 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [showRoast, setShowRoast] = useState(false);
   const [generatedAtMs, setGeneratedAtMs] = useState<number | null>(null);
-  const [theme, setTheme] = useState<Theme>(getInitialTheme);
+  const [theme, setTheme] = useState<ThemeName>(getInitialTheme);
+  const [scoreHistory, setScoreHistory] = useState<number[] | null>(null);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
 
-  const toggleTheme = useCallback(() => {
-    setTheme(prev => {
-      const next = prev === 'dark' ? 'light' : 'dark';
-      localStorage.setItem('gitscore:theme', next);
-      return next;
-    });
+  const handleThemeChange = useCallback((next: ThemeName) => {
+    setTheme(next);
+    try { localStorage.setItem('gitscore:theme', next); } catch { /* private mode */ }
   }, []);
 
   const handleSearch = useCallback(async (username: string) => {
@@ -55,20 +57,33 @@ export default function App() {
     setError(null);
     setShowRoast(false);
     setRoast(null);
+    setScoreHistory(null);
 
     try {
-      const res = await fetch(`/api/profile/${encodeURIComponent(username)}`);
-      if (!res.ok) {
-        const data = await res.json() as { error: string };
-        throw new Error(data.error);
-      }
-      const data = (await res.json()) as ProfileAnalysis;
+      const data = await apiJson<ProfileAnalysis>(
+        `/api/profile/${encodeURIComponent(username)}`,
+        undefined,
+        { unreachableHint: 'API unreachable — run `npm run dev:all`, or `vercel dev`, or push to GitHub and use the Vercel deployment.' },
+      );
       setAnalysis(data);
       setGeneratedAtMs(Date.now());
       saveLocalLeaderboardEntry(data);
+
+      // Best-effort sparkline fetch — backend no-ops gracefully if DB absent.
+      try {
+        const histBody = await apiJson<{ history: number[] }>(
+          `/api/score-history/${encodeURIComponent(data.user.login)}?days=14`,
+          undefined,
+          { unreachableHint: '' },
+        );
+        if (Array.isArray(histBody.history) && histBody.history.length >= 2) {
+          setScoreHistory(histBody.history);
+        }
+      } catch {
+        // ignore — sparkline is optional
+      }
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Something went wrong';
-      setError(msg);
+      setError(apiErrorMessage(err));
       setAnalysis(null);
       setGeneratedAtMs(null);
     } finally {
@@ -84,13 +99,16 @@ export default function App() {
     }
 
     try {
-      const res = await fetch(`/api/roast/${encodeURIComponent(analysis.user.login)}`);
-      if (!res.ok) throw new Error('Failed to roast');
-      const data = (await res.json()) as RoastResult;
+      const userLang = (navigator.language || 'en').split('-')[0];
+      const data = await apiJson<RoastResult>(
+        `/api/roast/${encodeURIComponent(analysis.user.login)}?lang=${encodeURIComponent(userLang)}`,
+        undefined,
+        { unreachableHint: 'API unreachable — see above.' },
+      );
       setRoast(data);
       setShowRoast(true);
-    } catch {
-      setError('Failed to generate roast');
+    } catch (err) {
+      setError(err instanceof ApiError ? apiErrorMessage(err) : 'Failed to generate roast');
     }
   }, [analysis, roast]);
 
@@ -104,7 +122,7 @@ export default function App() {
     <div className="app">
       <header className="app-header">
         <h1 className="app-title">
-          <span className="logo-icon">#</span> GitScore
+          <span className="logo-icon">G</span> GitScore
         </h1>
         <p className="app-subtitle">Analyze any GitHub profile. Get a score, badges, and a roast.</p>
 
@@ -129,29 +147,29 @@ export default function App() {
               Leaderboard
             </button>
           </div>
-          <button
-            className="theme-toggle"
-            onClick={toggleTheme}
-            aria-label="Toggle dark mode"
-            title={theme === 'dark' ? 'Switch to light' : 'Switch to dark'}
-          >
-            {theme === 'dark' ? '☀' : '☾'}
-          </button>
+          <ThemePicker theme={theme} onThemeChange={handleThemeChange} />
         </div>
       </header>
 
       {view === 'single' && (
         <main className="main-content">
+          <RoastOfDay onPick={handleSearch} />
+
           <SearchBar onSearch={handleSearch} loading={loading} />
 
           {error && <div className="error-banner">{error}</div>}
 
-          {loading && <div className="loading">Analyzing profile...</div>}
+          {loading && <div className="loading">Analyzing profile</div>}
 
           {analysis && !loading && (
             <div className="results">
               <ProfileCard analysis={analysis} />
-              <ScoreDisplay score={analysis.score} rank={rank!} generatedAtMs={generatedAtMs ?? undefined} />
+              <ScoreDisplay
+                score={analysis.score}
+                rank={rank!}
+                generatedAtMs={generatedAtMs ?? undefined}
+                historyPoints={scoreHistory ?? undefined}
+              />
               <Badges badges={analysis.badges} />
               <AchievementProgress badges={analysis.badges} user={analysis.user} repos={analysis.repos} />
               <Recommendations user={analysis.user} repos={analysis.repos} score={analysis.score} />

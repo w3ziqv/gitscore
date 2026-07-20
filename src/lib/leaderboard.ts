@@ -1,13 +1,15 @@
-// src/lib/leaderboard.ts — Neon Postgres-backed leaderboard persistence
+// src/lib/leaderboard.ts — Neon Postgres-backed leaderboard persistence.
+//
+// Functions:
+//   saveToLeaderboard(profile)         // upsert score + metadata
+//   getLeaderboard(limit)              // top by total score (global tab)
+//   getImprovedLeaderboard(limit, w)   // top by score-delta over last N days (F6)
+//   getEntry(login)                    // single-entry lookup
 
 import { sql, ensureSchema, isDbConfigured } from './db.js';
+import { getDeltas } from './scoreHistory.js';
 import type { LeaderboardEntry, ScoreRank } from '../types.js';
 
-/**
- * Shape of the data the /api/profile/:username endpoint emits after analyzing
- * a GitHub profile. Decoupled from `LeaderboardEntry` so the API does not have
- * to invent an `analyzedAtMs` timestamp itself.
- */
 export interface ProfileTelemetry {
   login: string;
   name: string | null;
@@ -24,7 +26,6 @@ export interface LeaderboardQueryResult {
   total: number;
 }
 
-/** Row shape returned by the Neon select, with Postgres column aliases applied. */
 interface LeaderboardRow {
   login: string;
   name: string | null;
@@ -36,8 +37,6 @@ interface LeaderboardRow {
   followers: number;
   analyzedAtMs: number;
 }
-
-
 
 /**
  * Upsert a profile into the leaderboard. Safe to call on every profile fetch —
@@ -71,8 +70,6 @@ export async function saveToLeaderboard(profile: ProfileTelemetry): Promise<void
         analyzed_at_ms = EXCLUDED.analyzed_at_ms
     `;
   } catch (err) {
-    // Never let persistence errors crash the profile endpoint —
-    // localStorage fallback still produces a useful leaderboard.
     console.error('leaderboard save failed:', err);
   }
 }
@@ -98,7 +95,7 @@ export async function getLeaderboard(limit: number = 10): Promise<LeaderboardQue
         followers,
         analyzed_at_ms AS "analyzedAtMs"
       FROM leaderboard
-      ORDER BY score DESC
+      ORDER BY score DESC, analyzed_at_ms DESC
       LIMIT ${limit}
     `) as LeaderboardRow[];
 
@@ -108,6 +105,59 @@ export async function getLeaderboard(limit: number = 10): Promise<LeaderboardQue
     return { entries: rows.map(toLeaderboardEntry), total };
   } catch (err) {
     console.error('leaderboard fetch failed:', err);
+    return { entries: [], total: 0 };
+  }
+}
+
+export interface ImprovedLeaderboardEntry extends LeaderboardEntry {
+  delta: number;
+}
+
+/**
+ * Compute the top `limit` profiles ranked by score-delta over `windowDays`.
+ * Falls back to `{ entries: [], total: 0 }` when DB not configured or when no
+ * history exists (delta = 0 for everyone). The frontend should display an
+ * empty-state in that case rather than mislabeling the tab.
+ */
+export async function getImprovedLeaderboard(
+  limit: number = 10,
+  windowDays: number = 7,
+): Promise<{ entries: ImprovedLeaderboardEntry[]; total: number }> {
+  if (!isDbConfigured()) {
+    return { entries: [], total: 0 };
+  }
+
+  try {
+    await ensureSchema();
+    const s = sql();
+    const baseRows = (await s`
+      SELECT
+        login, name, avatar_url, score, rank,
+        badges_earned AS "badgesEarned",
+        total_stars   AS "totalStars",
+        followers,
+        analyzed_at_ms AS "analyzedAtMs"
+      FROM leaderboard
+      ORDER BY analyzed_at_ms DESC
+      LIMIT ${Math.max(limit * 4, limit)}
+    `) as LeaderboardRow[];
+
+    if (baseRows.length === 0) {
+      return { entries: [], total: 0 };
+    }
+
+    const logins = baseRows.map(r => r.login);
+    const deltas = await getDeltas(logins, windowDays);
+
+    const enriched: ImprovedLeaderboardEntry[] = baseRows
+      .map(r => ({ ...toLeaderboardEntry(r), delta: deltas.get(r.login) ?? 0 }))
+      .filter(e => e.delta !== 0)
+      .sort((a, b) => b.delta - a.delta)
+      .slice(0, limit);
+
+    return { entries: enriched, total: enriched.length };
+  } catch (err) {
+    console.error('leaderboard improved fetch failed:', err);
     return { entries: [], total: 0 };
   }
 }
