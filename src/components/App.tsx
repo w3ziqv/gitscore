@@ -101,32 +101,49 @@ export default function App() {
   return (
     <div className="app">
       <header className="app-header">
-        <span className="app-subtitle">SYS.STATUS: ONLINE</span>
-        <h1 className="app-title">
-          <span className="logo-icon">G</span> GITSCORE
-        </h1>
-        <p className="app-subtitle">Analyze any GitHub profile. Get a score, badges, and a roast.</p>
+        <div className="masthead-grid">
+          <div className="masthead-left">
+            <div className="masthead-wordmark">
+              <span className="masthead-glyph" aria-hidden="true">◆</span>
+              <h1 className="app-title">GITSCORE</h1>
+            </div>
+            <p className="masthead-sub">GitHub Profile Analysis System</p>
+            <p className="app-subtitle masthead-tagline">
+              Analyze any GitHub profile. Get a score, badges, and a roast.
+            </p>
+          </div>
 
-        <div className="header-controls">
-          <div className="view-toggle">
-            <button
-              className={view === 'single' ? 'active' : ''}
-              onClick={() => setView('single')}
-            >
-              Single
-            </button>
-            <button
-              className={view === 'compare' ? 'active' : ''}
-              onClick={() => setView('compare')}
-            >
-              Head-to-Head
-            </button>
-            <button
-              className={view === 'leaderboard' ? 'active' : ''}
-              onClick={() => setView('leaderboard')}
-            >
-              Leaderboard
-            </button>
+          <div className="masthead-right">
+            <p className="masthead-status">
+              <span className="masthead-dot" aria-hidden="true" />
+              <span>SYS.STATUS: ONLINE</span>
+            </p>
+            <p className="masthead-coords">Kraków // 50.0647N 19.9450E</p>
+          </div>
+        </div>
+
+        <div className="masthead-bottom">
+          <div className="header-controls">
+            <div className="view-toggle">
+              <button
+                className={view === 'single' ? 'active' : ''}
+                onClick={() => setView('single')}
+              >
+                Single
+              </button>
+              <button
+                className={view === 'compare' ? 'active' : ''}
+                onClick={() => setView('compare')}
+              >
+                Head-to-Head
+              </button>
+              <button
+                className={view === 'leaderboard' ? 'active' : ''}
+                onClick={() => setView('leaderboard')}
+              >
+                Leaderboard
+              </button>
+            </div>
           </div>
         </div>
       </header>

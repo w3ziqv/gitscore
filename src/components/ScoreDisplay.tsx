@@ -80,6 +80,7 @@ export default function ScoreDisplay({ score, rank, generatedAtMs, historyPoints
             {generatedAtMs !== undefined && (
               <span className="sd-gen">GEN {formatTime(generatedAtMs)}</span>
             )}
+            <span className="sd-max">MAX {maxScore}</span>
           </div>
         </div>
       </div>
@@ -111,7 +112,8 @@ export default function ScoreDisplay({ score, rank, generatedAtMs, historyPoints
   );
 }
 
-// Sparkline — 1px hairline on transparent, mono delta readout (F5)
+// Sparkline — 1px hairline on transparent; readout is HTML (SVG text would
+// distort under preserveAspectRatio="none" and can't resolve CSS vars).
 function Sparkline({ points }: { points: number[] }) {
   const W = 200;
   const H = 32;
@@ -128,38 +130,46 @@ function Sparkline({ points }: { points: number[] }) {
     })
     .join(' ');
 
-  const delta = max - points[0];
+  // Vertical ticks instead of rects: vectorEffect keeps them 1px crisp even
+  // when the viewBox is stretched to the container width.
+  const ticks = points
+    .map((p, i) => {
+      const x = (i / cell) * W;
+      const y = H - ((p - min) / range) * H;
+      return `M${x.toFixed(2)},${(y - 2).toFixed(2)} v4`;
+    })
+    .join(' ');
+
+  const delta = points[points.length - 1] - points[0];
 
   return (
-    <svg
-      className="sd-sparkline"
-      viewBox={`0 0 ${W} ${H}`}
-      preserveAspectRatio="none"
-      role="img"
-      aria-label="score history"
-    >
-      <path
-        d={path}
-        fill="none"
-        stroke="var(--muted)"
-        strokeWidth={1}
-        vectorEffect="non-scaling-stroke"
-      />
-      {points.map((p, i) => {
-        const x = (i / cell) * W;
-        const y = H - ((p - min) / range) * H;
-        return <rect key={i} x={x - 1} y={y - 1} width={3} height={3} fill="var(--dim)" />;
-      })}
-      <text
-        x={W - 2}
-        y={H - 4}
-        textAnchor="end"
-        fontSize={8}
-        fontFamily="var(--font-mono)"
-        fill="var(--dim)"
+    <div className="sd-sparkline-wrap">
+      <svg
+        className="sd-sparkline"
+        viewBox={`0 0 ${W} ${H}`}
+        preserveAspectRatio="none"
+        role="img"
+        aria-label="score history"
       >
-        last {points.length}d · <tspan fill="var(--signal)">{delta >= 0 ? '+' : ''}{delta}</tspan>
-      </text>
-    </svg>
+        <path
+          d={path}
+          fill="none"
+          stroke="var(--muted)"
+          strokeWidth={1}
+          vectorEffect="non-scaling-stroke"
+        />
+        <path
+          d={ticks}
+          fill="none"
+          stroke="var(--dim)"
+          strokeWidth={1}
+          vectorEffect="non-scaling-stroke"
+        />
+      </svg>
+      <span className="sd-sparkline-readout">
+        last {points.length}d ·{' '}
+        <span className="sd-sparkline-delta">{delta >= 0 ? '+' : ''}{delta}</span>
+      </span>
+    </div>
   );
 }
