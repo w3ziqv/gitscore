@@ -38,18 +38,40 @@ function rankChip(rank: ScoreRank): CSSProperties {
   return { '--rank-color': RANK_COLORS[rank] ?? 'var(--muted)' } as CSSProperties;
 }
 
-function relativeTime(ms: number): string {
-  const diff = Date.now() - ms;
+const DAY_MS = 86_400_000;
+
+type Freshness = 'fresh' | 'aging' | 'old';
+
+function freshness(ms: number, now: number): Freshness {
+  const diff = now - ms;
+  if (diff <= 7 * DAY_MS) return 'fresh';
+  if (diff <= 30 * DAY_MS) return 'aging';
+  return 'old';
+}
+
+function freshnessLabel(ms: number, now: number): string {
+  const diff = Math.max(0, now - ms);
   const sec = Math.floor(diff / 1000);
-  if (sec < 60) return `${sec}s ago`;
+  if (sec < 60) return `${sec}S AGO`;
   const min = Math.floor(sec / 60);
-  if (min < 60) return `${min}m ago`;
+  if (min < 60) return `${min}M AGO`;
   const hr = Math.floor(min / 60);
-  if (hr < 24) return `${hr}h ago`;
+  if (hr < 24) return `${hr}H AGO`;
   const day = Math.floor(hr / 24);
-  if (day < 30) return `${day}d ago`;
-  const mo = Math.floor(day / 30);
-  return `${mo}mo ago`;
+  if (day < 30) return `${day}D AGO`;
+  return '>30D AGO';
+}
+
+function analyzedDate(ms: number): string {
+  return new Date(ms).toISOString().slice(0, 10);
+}
+
+function oldestNote(entries: GlobalRow[], now: number): string {
+  const maxDays = Math.max(
+    0,
+    ...entries.map(e => Math.floor((now - e.analyzedAtMs) / DAY_MS)),
+  );
+  return maxDays > 30 ? 'OLDEST: >30D AGO' : `OLDEST: ${maxDays}D AGO`;
 }
 
 interface GlobalRow {
@@ -140,6 +162,8 @@ export default function LeaderboardView({ onSearch }: Props) {
     setSquad(next);
   };
 
+  const now = Date.now();
+
   return (
     <main className="main-content">
       <section className="lb-panel">
@@ -169,6 +193,14 @@ export default function LeaderboardView({ onSearch }: Props) {
                 Squad
               </button>
             </div>
+
+            {tab === 'global' && (
+              <span className="lb-freshness-note">
+                {globalEntries.length > 0
+                  ? oldestNote(globalEntries, now)
+                  : 'REFRESHED DAILY'}
+              </span>
+            )}
 
             {tab === 'improved' && (
               <div className="lb-window" role="group" aria-label="Window">
@@ -276,32 +308,42 @@ export default function LeaderboardView({ onSearch }: Props) {
 
       {tab === 'global' && !loading && globalEntries.length > 0 && (
         <ol className="lb-list">
-          {globalEntries.map((entry, i) => (
-            <li
-              key={entry.login}
-              className="lb-row"
-              onClick={() => onSearch(entry.login)}
-            >
-              <span className="lb-rank-num">#{i + 1}</span>
-              <img
-                src={entry.avatar_url}
-                alt={entry.login}
-                className="lb-avatar"
-                loading="lazy"
-              />
-              <span className="lb-login">{entry.login}</span>
-              <span
-                className="lb-rank-badge"
-                style={rankChip(entry.rank)}
+          {globalEntries.map((entry, i) => {
+            const fresh = freshness(entry.analyzedAtMs, now);
+            const date = analyzedDate(entry.analyzedAtMs);
+            return (
+              <li
+                key={entry.login}
+                className={`lb-row${fresh === 'old' ? ' lb-stale' : ''}`}
+                onClick={() => onSearch(entry.login)}
               >
-                {entry.rank}
-              </span>
-              <span className="lb-score">{entry.score}</span>
-              <span className="lb-meta lb-stars">◇ {entry.totalStars}</span>
-              <span className="lb-meta lb-badges">▸ {entry.badgesEarned}</span>
-              <span className="lb-time">{relativeTime(entry.analyzedAtMs)}</span>
-            </li>
-          ))}
+                <span className="lb-rank-num">#{i + 1}</span>
+                <img
+                  src={entry.avatar_url}
+                  alt={entry.login}
+                  className="lb-avatar"
+                  loading="lazy"
+                />
+                <span className="lb-login">{entry.login}</span>
+                <span
+                  className="lb-rank-badge"
+                  style={rankChip(entry.rank)}
+                >
+                  {entry.rank}
+                </span>
+                <span className="lb-score">{entry.score}</span>
+                <span className="lb-meta lb-stars">◇ {entry.totalStars}</span>
+                <span className="lb-meta lb-badges">▸ {entry.badgesEarned}</span>
+                <span
+                  className={`lb-freshness-dot ${fresh}`}
+                  aria-label={`analyzed ${date}`}
+                  aria-hidden="false"
+                  title={`analyzed ${date}`}
+                />
+                <span className="lb-time">{freshnessLabel(entry.analyzedAtMs, now)}</span>
+              </li>
+            );
+          })}
         </ol>
       )}
 
@@ -320,10 +362,12 @@ export default function LeaderboardView({ onSearch }: Props) {
           {improvedEntries.map((entry, i) => {
             const deltaCls = entry.delta > 0 ? 'up' : entry.delta < 0 ? 'down' : '';
             const deltaStr = entry.delta >= 0 ? `+${entry.delta}` : `${entry.delta}`;
+            const fresh = freshness(entry.analyzedAtMs, now);
+            const date = analyzedDate(entry.analyzedAtMs);
             return (
               <li
                 key={entry.login}
-                className="lb-row"
+                className={`lb-row${fresh === 'old' ? ' lb-stale' : ''}`}
                 onClick={() => onSearch(entry.login)}
               >
                 <span className="lb-rank-num">#{i + 1}</span>
@@ -342,7 +386,13 @@ export default function LeaderboardView({ onSearch }: Props) {
                 </span>
                 <span className="lb-score">{entry.score}</span>
                 <span className={`lb-delta ${deltaCls}`}>{deltaStr}</span>
-                <span className="lb-time">{relativeTime(entry.analyzedAtMs)}</span>
+                <span
+                  className={`lb-freshness-dot ${fresh}`}
+                  aria-label={`analyzed ${date}`}
+                  aria-hidden="false"
+                  title={`analyzed ${date}`}
+                />
+                <span className="lb-time">{freshnessLabel(entry.analyzedAtMs, now)}</span>
               </li>
             );
           })}

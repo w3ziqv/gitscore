@@ -169,6 +169,76 @@
   color: var(--muted);
 }
 
+/* ---- Breakdown summary panel ---- */
+.compare-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+.compare-breakdown-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+
+.compare-breakdown-rows {
+  display: flex;
+  flex-direction: column;
+}
+
+.compare-breakdown-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 1rem;
+  align-items: baseline;
+  padding: 0.5rem 0;
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+
+.compare-breakdown-row + .compare-breakdown-row {
+  border-top: 1px solid var(--border);
+}
+
+.compare-breakdown-total {
+  padding-top: 0.75rem;
+}
+
+.compare-breakdown-cat {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.compare-breakdown-leader {
+  color: var(--text);
+  letter-spacing: 0.04em;
+}
+
+.compare-breakdown-leader.is-tie {
+  color: var(--dim);
+}
+
+.compare-breakdown-delta {
+  color: var(--signal);
+  font-weight: 700;
+}
+
+.compare-breakdown-value {
+  color: var(--dim);
+  letter-spacing: 0.04em;
+}
+
 /* ---- Responsive ---- */
 @media (max-width: 880px) {
   .compare-results {

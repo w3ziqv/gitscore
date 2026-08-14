@@ -17,3 +17,6 @@ Thumbs.db
 PLAN.md
 
 devserver.log
+
+.wrangler/
+.dev.vars

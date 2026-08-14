@@ -121,6 +121,18 @@ function Sparkline({ points }: { points: number[] }) {
   const max = Math.max(...points);
   const range = max - min || 1;
   const cell = points.length - 1 || 1;
+  const [hoverIndex, setHoverIndex] = useState<number | null>(null);
+
+  // svg is stretched (preserveAspectRatio="none"): map fractional offset, not raw offsetX.
+  const handleHover = (e: React.MouseEvent<SVGSVGElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const frac = Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width));
+    setHoverIndex(Math.round(frac * (points.length - 1)));
+  };
+
+  const hoverPct = hoverIndex === null ? null : (hoverIndex / (points.length - 1)) * 100;
+  const hoverDelta =
+    hoverIndex !== null && hoverIndex > 0 ? points[hoverIndex] - points[hoverIndex - 1] : null;
 
   const path = points
     .map((p, i) => {
@@ -150,6 +162,8 @@ function Sparkline({ points }: { points: number[] }) {
         preserveAspectRatio="none"
         role="img"
         aria-label="score history"
+        onMouseMove={handleHover}
+        onMouseLeave={() => setHoverIndex(null)}
       >
         <path
           d={path}
@@ -166,6 +180,27 @@ function Sparkline({ points }: { points: number[] }) {
           vectorEffect="non-scaling-stroke"
         />
       </svg>
+      {hoverIndex !== null && hoverPct !== null && (
+        <>
+          <div
+            className="sd-sparkline-guide"
+            style={{ left: `max(0px, min(100%, ${hoverPct}%))` }}
+          />
+          <span
+            className="sd-sparkline-hover"
+            style={{ left: `max(1.5rem, min(calc(100% - 1.5rem), ${hoverPct}%))` }}
+          >
+            day {hoverIndex + 1} // <span className="sd-sparkline-hover-value">{points[hoverIndex]}</span>{' '}
+            {hoverDelta === null ? (
+              <span className="sd-sparkline-hover-delta-none">—</span>
+            ) : (
+              <span className={hoverDelta >= 0 ? 'sd-sparkline-hover-delta-pos' : 'sd-sparkline-hover-delta-neg'}>
+                {hoverDelta >= 0 ? '+' : ''}{hoverDelta}
+              </span>
+            )}
+          </span>
+        </>
+      )}
       <span className="sd-sparkline-readout">
         last {points.length}d ·{' '}
         <span className="sd-sparkline-delta">{delta >= 0 ? '+' : ''}{delta}</span>

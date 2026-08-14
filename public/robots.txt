@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+
+Sitemap: https://gitscore.mateusz-szostak1.workers.dev/sitemap.xml

@@ -10,7 +10,7 @@ export default function ProfileCard({ analysis }: Props) {
 
   return (
     <div className="profile-card">
-      <img src={user.avatar_url} alt={user.login} className="avatar" />
+      <img src={user.avatar_url} alt={user.login} className="avatar" width={88} height={88} loading="lazy" decoding="async" />
       <div className="profile-info">
         <span className="profile-eyebrow">PROFILE //</span>
         <h2 className="profile-name">{user.name || user.login}</h2>

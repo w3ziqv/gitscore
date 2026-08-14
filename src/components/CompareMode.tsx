@@ -12,6 +12,32 @@ interface CompareResult {
   user2: ProfileAnalysis;
 }
 
+type Leader = 'USER 1' | 'USER 2' | 'TIE';
+
+interface CategoryRow {
+  label: string;
+  leader: Leader;
+  delta: number;
+}
+
+function categoryRows(u1: ProfileAnalysis, u2: ProfileAnalysis): CategoryRow[] {
+  const entries: Array<[string, (s: ProfileAnalysis['score']) => number]> = [
+    ['Repos', s => s.repos],
+    ['Stars', s => s.stars],
+    ['Followers', s => s.followers],
+    ['Activity', s => s.activity],
+    ['Diversity', s => s.diversity],
+  ];
+  return entries.map(([label, pick]) => {
+    const a = pick(u1.score);
+    const b = pick(u2.score);
+    if (a === b) return { label, leader: 'TIE', delta: 0 };
+    return a > b
+      ? { label, leader: 'USER 1', delta: a - b }
+      : { label, leader: 'USER 2', delta: b - a };
+  });
+}
+
 export default function CompareMode() {
   const [user1, setUser1] = useState('');
   const [user2, setUser2] = useState('');
@@ -85,7 +111,46 @@ export default function CompareMode() {
         {error && <div className="error-banner">{error}</div>}
 
         {result && (
-          <div className="compare-results">
+          <>
+            <div className="compare-breakdown">
+              <div className="compare-breakdown-eyebrow">BREAKDOWN //</div>
+              <div className="compare-breakdown-rows">
+                {categoryRows(result.user1, result.user2).map(row => (
+                  <div className="compare-breakdown-row" key={row.label}>
+                    <span className="compare-breakdown-cat">{row.label}</span>
+                    {row.leader === 'TIE' ? (
+                      <span className="compare-breakdown-leader is-tie">TIE</span>
+                    ) : (
+                      <span className="compare-breakdown-leader">
+                        {row.leader} +{row.delta}
+                      </span>
+                    )}
+                    <span className="compare-breakdown-value">
+                      {row.leader === 'TIE' ? '—' : `Δ +${row.delta}`}
+                    </span>
+                  </div>
+                ))}
+                <div className="compare-breakdown-row compare-breakdown-total">
+                  <span className="compare-breakdown-cat">TOTAL</span>
+                  {result.user1.score.total === result.user2.score.total ? (
+                    <span className="compare-breakdown-leader is-tie">TIE</span>
+                  ) : (
+                    <span className="compare-breakdown-leader">
+                      {result.user1.score.total > result.user2.score.total ? 'USER 1' : 'USER 2'}{' '}
+                      <span className="compare-breakdown-delta">
+                        +{Math.abs(result.user1.score.total - result.user2.score.total)}
+                      </span>
+                    </span>
+                  )}
+                  <span className="compare-breakdown-value">
+                    {result.user1.score.total === result.user2.score.total
+                      ? '—'
+                      : Math.min(result.user1.score.total, result.user2.score.total)}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div className="compare-results">
             <div className={`compare-side ${winner === result.user1.user.login ? 'winner' : ''}`}>
               {winner === result.user1.user.login ? (
                 <div className="winner-tag">Winner</div>
@@ -106,7 +171,8 @@ export default function CompareMode() {
               <ScoreDisplay score={result.user2.score} rank={getScoreRank(result.user2.score.total)} />
               <Badges badges={result.user2.badges} />
             </div>
-          </div>
+            </div>
+          </>
         )}
 
         {!result && !loading && !error && (

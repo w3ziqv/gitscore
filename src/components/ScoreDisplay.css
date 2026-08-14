@@ -231,6 +231,47 @@
   color: var(--signal);
 }
 
+/* Hover readout — same recipe as .sd-sparkline-readout, anchored to the hovered point */
+.sd-sparkline-guide {
+  position: absolute;
+  top: 0;
+  width: 1px;
+  height: 36px;
+  background: var(--border-strong);
+  pointer-events: none;
+  transform: translateX(-50%);
+}
+
+.sd-sparkline-hover {
+  position: absolute;
+  top: 0;
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--dim);
+  pointer-events: none;
+  transform: translateX(-50%);
+}
+
+.sd-sparkline-hover-value {
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.sd-sparkline-hover-delta-pos {
+  color: var(--signal);
+}
+
+.sd-sparkline-hover-delta-neg {
+  color: var(--error);
+}
+
+.sd-sparkline-hover-delta-none {
+  color: var(--dim);
+}
+
 /* ============ Responsive ============ */
 
 @media (max-width: 640px) {

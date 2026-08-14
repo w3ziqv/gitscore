@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, lazy, Suspense } from 'react';
 import type { ProfileAnalysis, RoastResult } from '../types.js';
 import { getScoreRank } from '../lib/score.js';
 import { calculateFunStats } from '../lib/funStats.js';
@@ -12,15 +12,42 @@ import Recommendations from './Recommendations.js';
 import FunStats from './FunStats.js';
 import ShareCard from './ShareCard.js';
 import RoastPanel from './RoastPanel.js';
-import CompareMode from './CompareMode.js';
-import LeaderboardView from './LeaderboardView.js';
 import RecentActivity from './RecentActivity.js';
 import RoastOfDay from './RoastOfDay.js';
 import { saveLocalLeaderboardEntry } from '../lib/localLeaderboard.js';
 import { apiJson, apiErrorMessage, ApiError } from '../lib/api.js';
 import './App.css';
 
+const CompareMode = lazy(() => import('./CompareMode.js'));
+const LeaderboardView = lazy(() => import('./LeaderboardView.js'));
+
+const LAST_USER_KEY = 'gitscore:lastUser';
+
 type View = 'single' | 'compare' | 'leaderboard';
+
+function readLastUser(): string | null {
+  try {
+    return localStorage.getItem(LAST_USER_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function saveLastUser(username: string) {
+  try {
+    localStorage.setItem(LAST_USER_KEY, username);
+  } catch {
+    // ignore — persistence is best-effort
+  }
+}
+
+function clearLastUser() {
+  try {
+    localStorage.removeItem(LAST_USER_KEY);
+  } catch {
+    // ignore — persistence is best-effort
+  }
+}
 
 export default function App() {
   const [view, setView] = useState<View>('single');
@@ -31,13 +58,27 @@ export default function App() {
   const [showRoast, setShowRoast] = useState(false);
   const [generatedAtMs, setGeneratedAtMs] = useState<number | null>(null);
   const [scoreHistory, setScoreHistory] = useState<number[] | null>(null);
+  const [lastUsername, setLastUsername] = useState<string | null>(null);
+  const [lastSavedUser, setLastSavedUser] = useState<string | null>(() =>
+    readLastUser()
+  );
 
   const handleSearch = useCallback(async (username: string) => {
+    setLastUsername(username);
     setLoading(true);
     setError(null);
     setShowRoast(false);
     setRoast(null);
     setScoreHistory(null);
+
+    // A manually searched different username invalidates the saved quick-check.
+    setLastSavedUser(prev => {
+      if (prev && prev.toLowerCase() !== username.trim().toLowerCase()) {
+        clearLastUser();
+        return null;
+      }
+      return prev;
+    });
 
     try {
       const data = await apiJson<ProfileAnalysis>(
@@ -48,6 +89,8 @@ export default function App() {
       setAnalysis(data);
       setGeneratedAtMs(Date.now());
       saveLocalLeaderboardEntry(data);
+      saveLastUser(data.user.login);
+      setLastSavedUser(data.user.login);
 
       // Best-effort sparkline fetch — backend no-ops gracefully if DB absent.
       try {
@@ -100,6 +143,8 @@ export default function App() {
 
   return (
     <div className="app">
+      <a className="skip-link" href="#main">SKIP TO CONTENT</a>
+
       <header className="app-header">
         <div className="masthead-grid">
           <div className="masthead-left">
@@ -149,16 +194,57 @@ export default function App() {
       </header>
 
       {view === 'single' && (
-        <main className="main-content">
+        <main id="main" className="main-content">
           <RoastOfDay onPick={handleSearch} />
 
           <SearchBar onSearch={handleSearch} loading={loading} />
 
-          {error && <div className="error-banner">{error}</div>}
+          <div className="status-region" aria-live="polite">
+            {error && (
+              <div className="error-banner">
+                <span className="error-text">{error}</span>
+                {lastUsername && (
+                  <button
+                    className="error-retry"
+                    onClick={() => handleSearch(lastUsername)}
+                  >
+                    RETRY
+                  </button>
+                )}
+              </div>
+            )}
 
-          {loading && <div className="loading">Analyzing profile</div>}
+            {lastSavedUser && !loading && !error && !analysis && (
+              <div className="last-user">
+                <span className="last-user-label">LAST:</span>
+                <span className="last-user-name">{lastSavedUser}</span>
+                <button
+                  className="last-user-btn"
+                  onClick={() => handleSearch(lastSavedUser)}
+                >
+                  CHECK AGAIN
+                </button>
+              </div>
+            )}
 
-          {analysis && !loading && (
+            {loading && (
+              <div className="results-skeleton">
+                <span className="sr-only">Analyzing profile</span>
+                <div className="skeleton-hero" aria-hidden="true" />
+                <div className="skeleton-row" aria-hidden="true">
+                  <div className="skeleton-block" />
+                  <div className="skeleton-block" />
+                  <div className="skeleton-block" />
+                </div>
+                <div className="skeleton-lines" aria-hidden="true">
+                  <div className="skeleton-line" />
+                  <div className="skeleton-line" />
+                  <div className="skeleton-line" />
+                </div>
+              </div>
+            )}
+
+            {analysis && !loading && (
             <div className="results">
               <ProfileCard analysis={analysis} />
               <ScoreDisplay
@@ -206,11 +292,12 @@ export default function App() {
               {showRoast && roast && <RoastPanel roast={roast} />}
             </div>
           )}
+          </div>
 
           {!analysis && !loading && !error && (
             <div className="empty-state">
               <div className="empty-mark" aria-hidden="true">
-                <svg viewBox="0 0 16 16" shape-rendering="crispEdges">
+                <svg viewBox="0 0 16 16" shapeRendering="crispEdges">
                   <g fill="currentColor">
                     <rect x="2" y="2" width="9" height="2" />
                     <rect x="2" y="4" width="2" height="8" />
@@ -237,9 +324,17 @@ export default function App() {
         </main>
       )}
 
-      {view === 'compare' && <CompareMode />}
+      {view === 'compare' && (
+        <Suspense fallback={<div className="loading">LOADING VIEW</div>}>
+          <CompareMode />
+        </Suspense>
+      )}
 
-      {view === 'leaderboard' && <LeaderboardView onSearch={handleSearch} />}
+      {view === 'leaderboard' && (
+        <Suspense fallback={<div className="loading">LOADING VIEW</div>}>
+          <LeaderboardView onSearch={handleSearch} />
+        </Suspense>
+      )}
 
       <footer className="app-footer">
         <a href="https://github.com/w3ziqv/gitscore" target="_blank" rel="noopener noreferrer">

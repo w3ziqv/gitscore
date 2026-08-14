@@ -4,7 +4,7 @@ GitHub profile analyzer. Type a username, get a score from 0 to 1000, badges,
 a language breakdown, and a roast. You can also compare two users head to head
 or check the global leaderboard.
 
-Live: [gitscore-mu.vercel.app](https://gitscore-mu.vercel.app)
+Live: [gitscore.mateusz-szostak1.workers.dev](https://gitscore.mateusz-szostak1.workers.dev)
 
 ![GitScore screenshot](screenshot.png)
 
@@ -47,23 +47,37 @@ Stars and followers are logarithmic on purpose: 100k stars should not be worth
 
 ```bash
 npm install
-npm run dev:all     # frontend on :5173 + local API on :3001
+npm run dev      # Vite dev — the Worker serves /api in-workerd, no extra server
 ```
 
 Tests and build:
 
 ```bash
 npm test
-npm run build
+npm run build    # outputs dist/client (assets) + worker bundle
 ```
 
-### Global leaderboard
+## Deploy (Cloudflare Workers)
 
-The leaderboard needs `DATABASE_URL` (Neon Postgres). Create a free project
-on [neon.tech](https://neon.tech), copy the pooled connection string into
-`.env` (see `.env.example`) and set the same variable in Vercel. The schema
-is created automatically on first request. Without `DATABASE_URL` everything
-still works — the leaderboard just falls back to per-browser localStorage.
+```bash
+npm run build
+npx wrangler deploy --config wrangler.deploy.jsonc
+```
+
+The repo also ships `.github/workflows/deploy.yml` (wrangler-action on push to
+main; needs `CLOUDFLARE_API_TOKEN` in repo secrets). Cron `0 3 * * *` refreshes
+the top of the leaderboard when `GITHUB_TOKEN` is set.
+
+### Secrets
+
+Set these on the worker (dashboard → gitscore → Settings → Variables, or
+`npx wrangler secret put <NAME>`):
+
+| Secret | Why |
+|---|---|
+| `GITHUB_TOKEN` | **Required in practice.** Without it the GitHub API anonymous limit (60/h per IP) is shared across all Cloudflare egress IPs and exhausts in minutes — profiles return 429. With it: 5000/h. |
+| `DATABASE_URL` | Neon Postgres for the global leaderboard + score history + threshold webhooks. Without it those features gracefully no-op (localStorage fallback). |
+| `WEBHOOK_SUB_TOKEN` | Enables `POST /api/webhook/threshold` (score-cross alerts). Without it the route returns 503. |
 
 ## API
 

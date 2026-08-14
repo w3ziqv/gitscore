@@ -218,6 +218,45 @@
   white-space: nowrap;
 }
 
+/* Freshness dot — 6px square status indicator (zero-radius language).
+   fresh: --signal (analyzed ≤ 7d) / aging: --rank-b (7–30d) / old: --dim. */
+:root .lb-freshness-dot {
+  flex-shrink: 0;
+  width: 6px;
+  height: 6px;
+  background: var(--dim);
+}
+
+:root .lb-freshness-dot.fresh {
+  background: var(--signal);
+}
+
+:root .lb-freshness-dot.aging {
+  background: var(--rank-b);
+}
+
+/* Stale rows (> 30d): reduced presence on content only — the row keeps its
+   hover fill and stays clickable; content is never hidden, only de-emphasized. */
+:root .lb-stale > * {
+  opacity: 0.55;
+}
+
+/* The dot is the staleness signal itself — never dim it. */
+:root .lb-stale .lb-freshness-dot {
+  opacity: 1;
+}
+
+/* Header micro-line (Global tab): "REFRESHED DAILY" / "OLDEST: XD AGO". */
+:root .lb-freshness-note {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--dim);
+  white-space: nowrap;
+}
+
 /* Delta chip (improved tab) — signal / error per sign. */
 :root .lb-delta {
   flex-shrink: 0;
@@ -339,7 +378,8 @@
 
 /* ---- Narrow screens: drop the least-essential meta ---- */
 @media (max-width: 640px) {
-  :root .lb-time {
+  :root .lb-time,
+  :root .lb-freshness-dot {
     display: none;
   }
 }
