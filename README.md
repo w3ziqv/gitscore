@@ -98,6 +98,8 @@ still works — the leaderboard just falls back to per-browser localStorage.
 - The UI is a dark mission-control look (SpaceX/x.ai inspired): black
   background, mono data readouts, hairline borders. No themes, one look.
 - Badge glyphs in the UI are geometric characters (○ ◇ ☆ ▸), not emojis.
+- Threshold webhooks (score-cross alerts) are opt-in: set `WEBHOOK_SUB_TOKEN`
+  (a long random string) to enable `POST /api/webhook/threshold`.
 - `screenshot.png` is regenerated from the homepage when the design changes.
 
 ## Author

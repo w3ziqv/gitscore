@@ -12,6 +12,7 @@ import type { GitHubUser, GitHubRepo, ProfileAnalysis } from '../../src/types.js
 
 const GITHUB_API = 'https://api.github.com';
 const CACHE_TTL_MS = 1000 * 60 * 30;
+const USERNAME_RE = /^[a-z0-9_-]{1,39}$/i;
 
 interface CacheEntry {
   data: string;
@@ -44,6 +45,8 @@ async function fetchGitHub(path: string): Promise<Response> {
 }
 
 export async function fetchProfile(username: string): Promise<ProfileAnalysis> {
+  if (!USERNAME_RE.test(username)) throw new Error('INVALID_USERNAME');
+
   const cached = getCachedAnalysis(username);
   if (cached) return cached;
 
@@ -89,6 +92,8 @@ export function sendError(res: import('@vercel/node').VercelResponse, error: unk
     res.status(404).json({ error: 'User not found' });
   } else if (message === 'RATE_LIMITED') {
     res.status(429).json({ error: 'GitHub API rate limit exceeded. Try again later.' });
+  } else if (message === 'INVALID_USERNAME') {
+    res.status(400).json({ error: 'Invalid username' });
   } else {
     res.status(500).json({ error: message });
   }

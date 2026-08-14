@@ -6,14 +6,18 @@
 // `fired_at_ms` column ensures we don't re-fire the same crossing until the
 // next refresh window (cheap de-duplication).
 //
-// Auth: `Authorization: Bearer <token>` — any string ≥32 chars. The token is
-// echoed to the subscriber's webhook on every fire so they can verify origin.
+// Auth: `Authorization: Bearer <token>` — must equal the `WEBHOOK_SUB_TOKEN`
+// env secret (timing-safe comparison). When the env var is unset this route
+// returns 503; webhooks are opt-in per deployment.
+//
+// SSRF guard: `webhook_url` must be a public https endpoint (private IPs,
+// localhost, and hosts resolving to them are rejected).
 //
 // Body: { login: string, threshold: number(0..1000), webhook_url: string }
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { ensureSchema, sql, isDbConfigured } from '../../src/lib/db.js';
-import { extractBearer, isBearerTokenValid } from '../../src/lib/webhook.js';
+import { extractBearer, isBearerTokenValid, isSafeWebhookUrl } from '../../src/lib/webhook.js';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
@@ -26,9 +30,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return;
   }
 
+  if (!process.env.WEBHOOK_SUB_TOKEN) {
+    res.status(503).json({ error: 'Webhook subscriptions are disabled: WEBHOOK_SUB_TOKEN is not set.' });
+    return;
+  }
+
   const token = extractBearer(req.headers['authorization']);
   if (!isBearerTokenValid(token)) {
-    res.status(401).json({ error: 'Missing or invalid Authorization Bearer (must be ≥32 chars).' });
+    res.status(401).json({ error: 'Missing or invalid Authorization Bearer (must match WEBHOOK_SUB_TOKEN).' });
     return;
   }
 
@@ -48,6 +57,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
   if (!webhookUrl.startsWith('https://')) {
     res.status(400).json({ error: 'webhook_url must be an https URL' });
+    return;
+  }
+  if (!(await isSafeWebhookUrl(webhookUrl))) {
+    res.status(400).json({ error: 'webhook_url must point to a public https endpoint' });
     return;
   }
 

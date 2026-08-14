@@ -29,6 +29,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     res.status(400).json({ error: 'Username required' });
     return;
   }
+  if (!/^[a-z0-9_-]{1,39}$/i.test(username)) {
+    res.status(400).json({ error: 'Invalid username' });
+    return;
+  }
 
   try {
     const analysis = await fetchProfile(username);
@@ -122,7 +126,7 @@ async function fireThresholdSubs(login: string, nowScore: number): Promise<void>
         firedAtMs: now,
       });
 
-      const fired = await fireWebhook(sub.webhook_url, payload, sub.token);
+      const fired = await fireWebhook(sub.webhook_url, payload);
       if (fired) {
         try {
           await s`
