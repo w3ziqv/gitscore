@@ -1,0 +1,100 @@
+npm notice run gitscore@1.0.0 npx
+npm notice run wrangler tail --config wrangler.deploy.jsonc
+{
+    "wallTime": 0,
+    "cpuTime": 0,
+    "truncated": false,
+    "executionModel": "stateless",
+    "outcome": "ok",
+    "scriptVersion": {
+        "id": "20b4f2ca-d44d-4fc4-8d75-9f0a8ad2b45a"
+    },
+    "scriptName": "gitscore",
+    "diagnosticsChannelEvents": [],
+    "exceptions": [],
+    "logs": [],
+    "eventTimestamp": 1786723231124,
+    "event": {
+        "request": {
+            "url": "https://gitscore.mateusz-szostak1.workers.dev/api/leaderboard?limit=5",
+            "method": "GET",
+            "headers": {
+                "accept-encoding": "gzip, br",
+                "cf-connecting-ip": "89.234.244.125",
+                "cf-ipcountry": "PL",
+                "cf-ray": "a2b12c427f196ca2",
+                "cf-visitor": "{\"scheme\":\"https\"}",
+                "connection": "Keep-Alive",
+                "host": "gitscore.mateusz-szostak1.workers.dev",
+                "user-agent": "Mozilla/5.0 (Windows NT 10.0; Microsoft Windows 10.0.26200; pl-PL) PowerShell/7.7.0",
+                "x-forwarded-proto": "https",
+                "x-real-ip": "89.234.244.125"
+            },
+            "cf": {
+                "httpProtocol": "HTTP/1.1",
+                "clientAcceptEncoding": "gzip, deflate, br",
+                "requestPriority": "",
+                "edgeRequestKeepAliveStatus": 1,
+                "requestHeaderNames": {},
+                "clientTcpRtt": 12,
+                "clientQuicRtt": 0,
+                "colo": "WAW",
+                "asn": 197615,
+                "asOrganization": "NaszaSiec.NET Krakow Damian Murzynowski",
+                "country": "PL",
+                "isEUCountry": "1",
+                "city": "Kraków",
+                "continent": "EU",
+                "region": "Lesser Poland",
+                "regionCode": "12",
+                "timezone": "Europe/Warsaw",
+                "longitude": "19.93658",
+                "latitude": "50.06143",
+                "postalCode": "30-101",
+                "tlsVersion": "TLSv1.3",
+                "tlsCipher": "AEAD-AES256-GCM-SHA384",
+                "tlsClientRandom": "Qqt+I57lHlJwks81tTpqLRRpkDeguKZA+4bsO2yecMw=",
+                "tlsClientCiphersSha1": "kTkJ+HAwBvIuoPFncb1wEDLcgfg=",
+                "tlsClientExtensionsSha1": "Bxwn0Bs0z+5dY69ZcqleTRGmlpE=",
+                "tlsClientExtensionsSha1Le": "sb2ftGg4/laBHA9Q/MJ4X/0+cJY=",
+                "tlsExportedAuthenticator": {
+                    "clientHandshake": "6fa628acc9bf9f07d28a53c16b70ddef433f5d90e4d5c458ddebe040a1dcde625b27f76de3e0e3cf47753ae68c1ac0db",
+                    "serverHandshake": "0dbc3b4c58208ade2a8e9a90a4a3e4e8da624c26ab6d61f95ad8ac5823154f2819e3abbe403c59cf3e0f2b35be2a9577",
+                    "clientFinished": "7b78a66461e88e0aace8387d3959e37d29cee4bbb5236ba99703e00bb69fc39e50fb8c84d780ed1b67b43d637505cb2c",
+                    "serverFinished": "fcc4200eb26895aec943e8d656f7969b85f446813071f6bf89c735f1e6ba6708c72ba43261ed003e27cc152fc9c68bd5"
+                },
+                "tlsClientHelloLength": "455",
+                "tlsClientAuth": {
+                    "certPresented": "0",
+                    "certVerified": "NONE",
+                    "certRevoked": "0",
+                    "certIssuerDN": "",
+                    "certSubjectDN": "",
+                    "certIssuerDNRFC2253": "",
+                    "certSubjectDNRFC2253": "",
+                    "certIssuerDNLegacy": "",
+                    "certSubjectDNLegacy": "",
+                    "certSerial": "",
+                    "certIssuerSerial": "",
+                    "certSKI": "",
+                    "certIssuerSKI": "",
+                    "certFingerprintSHA1": "",
+                    "certFingerprintSHA256": "",
+                    "certNotBefore": "",
+                    "certNotAfter": "",
+                    "certRFC9440": "",
+                    "certRFC9440TooLarge": false,
+                    "certChainRFC9440": "",
+                    "certChainRFC9440TooLarge": false
+                },
+                "verifiedBotCategory": "",
+                "edgeL4": {
+                    "deliveryRate": 347754
+                }
+            }
+        },
+        "response": {
+            "status": 200
+        }
+    }
+}

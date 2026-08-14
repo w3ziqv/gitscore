@@ -42,14 +42,21 @@ const DAY_MS = 86_400_000;
 
 type Freshness = 'fresh' | 'aging' | 'old';
 
-function freshness(ms: number, now: number): Freshness {
+function toMs(value: number | string): number {
+  const ms = typeof value === 'string' ? Number(value) : value;
+  return Number.isFinite(ms) ? ms : 0;
+}
+
+function freshness(value: number | string, now: number): Freshness {
+  const ms = toMs(value);
   const diff = now - ms;
   if (diff <= 7 * DAY_MS) return 'fresh';
   if (diff <= 30 * DAY_MS) return 'aging';
   return 'old';
 }
 
-function freshnessLabel(ms: number, now: number): string {
+function freshnessLabel(value: number | string, now: number): string {
+  const ms = toMs(value);
   const diff = Math.max(0, now - ms);
   const sec = Math.floor(diff / 1000);
   if (sec < 60) return `${sec}S AGO`;
@@ -62,14 +69,15 @@ function freshnessLabel(ms: number, now: number): string {
   return '>30D AGO';
 }
 
-function analyzedDate(ms: number): string {
-  return new Date(ms).toISOString().slice(0, 10);
+function analyzedDate(value: number | string): string {
+  if (!Number.isFinite(typeof value === 'string' ? Number(value) : value)) return '—';
+  return new Date(toMs(value)).toISOString().slice(0, 10);
 }
 
 function oldestNote(entries: GlobalRow[], now: number): string {
   const maxDays = Math.max(
     0,
-    ...entries.map(e => Math.floor((now - e.analyzedAtMs) / DAY_MS)),
+    ...entries.map(e => Math.floor((now - toMs(e.analyzedAtMs)) / DAY_MS)),
   );
   return maxDays > 30 ? 'OLDEST: >30D AGO' : `OLDEST: ${maxDays}D AGO`;
 }

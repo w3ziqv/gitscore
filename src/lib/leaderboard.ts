@@ -196,6 +196,7 @@ function toLeaderboardEntry(row: LeaderboardRow): LeaderboardEntry {
     badgesEarned: row.badgesEarned,
     totalStars: row.totalStars,
     followers: row.followers,
-    analyzedAtMs: row.analyzedAtMs,
+    // Neon returns BIGINT columns as strings; the contract says number.
+    analyzedAtMs: Number(row.analyzedAtMs),
   };
 }

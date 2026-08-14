@@ -1,4 +1,5 @@
 import { useState, useCallback, useMemo, lazy, Suspense } from 'react';
+import ErrorBoundary from './ErrorBoundary.js';
 import type { ProfileAnalysis, RoastResult } from '../types.js';
 import { getScoreRank } from '../lib/score.js';
 import { calculateFunStats } from '../lib/funStats.js';
@@ -325,15 +326,19 @@ export default function App() {
       )}
 
       {view === 'compare' && (
-        <Suspense fallback={<div className="loading">LOADING VIEW</div>}>
-          <CompareMode />
-        </Suspense>
+        <ErrorBoundary key={view}>
+          <Suspense fallback={<div className="loading">LOADING VIEW</div>}>
+            <CompareMode />
+          </Suspense>
+        </ErrorBoundary>
       )}
 
       {view === 'leaderboard' && (
-        <Suspense fallback={<div className="loading">LOADING VIEW</div>}>
-          <LeaderboardView onSearch={handleSearch} />
-        </Suspense>
+        <ErrorBoundary key={view}>
+          <Suspense fallback={<div className="loading">LOADING VIEW</div>}>
+            <LeaderboardView onSearch={handleSearch} />
+          </Suspense>
+        </ErrorBoundary>
       )}
 
       <footer className="app-footer">
