@@ -192,11 +192,20 @@ export default function App() {
 
           {!analysis && !loading && !error && (
             <div className="empty-state">
-              <pre className="empty-ascii">{`  #  ____ _ _   _ ___ _   _ __  __
-  # / ___| | | | |_ _| | | |  \\/  |
-  #| |  _| | |_| || || | | | |\\/| |
-  #| |_| | |  _  || || |_| | |  | |
-  # \\____|_|_| |_|___|\\___/|_|  |_|`}</pre>
+              <div className="empty-mark" aria-hidden="true">
+                <svg viewBox="0 0 16 16" shape-rendering="crispEdges">
+                  <g fill="currentColor">
+                    <rect x="2" y="2" width="9" height="2" />
+                    <rect x="2" y="4" width="2" height="8" />
+                    <rect x="9" y="4" width="2" height="2" />
+                    <rect x="9" y="6" width="2" height="2" />
+                    <rect x="11" y="6" width="2" height="2" />
+                    <rect x="9" y="8" width="2" height="2" />
+                    <rect x="2" y="12" width="9" height="2" />
+                  </g>
+                </svg>
+              </div>
+              <p className="empty-status">Standby // awaiting input</p>
               <p>Enter a GitHub username to analyze.</p>
               <div className="suggestions">
                 <span>Try:</span>
