@@ -6,8 +6,6 @@ or check the global leaderboard.
 
 Live: [gitscore.mateusz-szostak1.workers.dev](https://gitscore.mateusz-szostak1.workers.dev)
 
-![GitScore screenshot](screenshot.png)
-
 ## Features
 
 - **Score (0–1000)** — five factors: repos, stars, followers, activity, language diversity. Weights and caps below.
