@@ -20,3 +20,4 @@ devserver.log
 
 .wrangler/
 .dev.vars
+tail.log
