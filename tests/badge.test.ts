@@ -28,16 +28,16 @@ describe('generateBadgeSvg', () => {
     expect(svg).toContain('>732<');
   });
 
-  it('renders a dark background when theme=dark', () => {
-    const dark = generateBadgeSvg({ login: 'u', score: 1, rank: 'F', theme: 'dark' });
-    expect(dark).toContain('#0c0c14');
+  it('renders a dark background by default', () => {
+    const dark = generateBadgeSvg({ login: 'u', score: 1, rank: 'F' });
+    expect(dark).toContain('#0e0e0e');
     const light = generateBadgeSvg({ login: 'u', score: 1, rank: 'F', theme: 'light' });
-    expect(light).toContain('#fbfbf8');
+    expect(light).toContain('#f0f0fa');
   });
 
-  it('falls back to light theme for unknown theme strings', () => {
-    // @ts-expect-error — purposely invalid theme input to confirm the default applies
+  it('falls back to dark theme for unknown theme strings', () => {
+    // @ts-expect-error - purposely invalid theme input to confirm the default applies
     const svg = generateBadgeSvg({ login: 'u', score: 1, rank: 'F', theme: 'synthwave' });
-    expect(svg).toContain('#fbfbf8');
+    expect(svg).toContain('#0e0e0e');
   });
 });

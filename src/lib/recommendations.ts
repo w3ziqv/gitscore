@@ -24,11 +24,11 @@ export function generateRecommendations(
       current: score.stars,
       max: MAX_POINTS.stars,
       build: {
-        emoji: '⭐',
+        glyph: '★',
         title: totalStars === 0 ? 'Earn your first star' : `Reach ${nextStarMilestone(totalStars)} stars`,
         detail: totalStars === 0
-          ? 'Push a polished project and share it. One person starring your repo unlocks Rising Star (+30 pts).'
-          : `Stars are worth 3 pts each. ${MAX_POINTS.stars - score.stars} pts still on the table.`,
+          ? 'Push a polished project and share it. One person starring your repo unlocks Rising Star.'
+          : 'Stars saturate logarithmically: 10 stars is about 115 pts, ~500 fills the 300-pt cap.',
         impactPoints: MAX_POINTS.stars - score.stars,
       },
     },
@@ -37,11 +37,11 @@ export function generateRecommendations(
       current: score.followers,
       max: MAX_POINTS.followers,
       build: {
-        emoji: '🦋',
+        glyph: '◐',
         title: user.followers === 0 ? 'Get your first follower' : `Reach ${nextFollowerMilestone(user.followers)} followers`,
         detail: user.followers === 0
-          ? 'Follow developers in your niche, comment on their issues, share your work. First follower = Social Butterfly (+50 pts).'
-          : `Each follower is worth 4 pts. ${MAX_POINTS.followers - score.followers} pts available.`,
+          ? 'Follow developers in your niche, comment on their issues, share your work. First follower = Social Butterfly.'
+          : 'Followers saturate logarithmically: 10 is about 69 pts, ~1000 fills the 200-pt cap.',
         impactPoints: MAX_POINTS.followers - score.followers,
       },
     },
@@ -50,9 +50,9 @@ export function generateRecommendations(
       current: score.repos,
       max: MAX_POINTS.repos,
       build: {
-        emoji: '📦',
-        title: `Publish ${Math.ceil((MAX_POINTS.repos - score.repos) / 5)} more repos`,
-        detail: `Each repo is worth 5 pts up to ${MAX_POINTS.repos} pts. 20 repos unlocks Open Sourcerer.`,
+        glyph: '▣',
+        title: `Publish ${Math.max(0, 40 - user.public_repos)} more repos`,
+        detail: `Repo count saturates with sqrt: 40 repos fills the 200-pt cap. 20 repos unlocks Open Sourcerer.`,
         impactPoints: MAX_POINTS.repos - score.repos,
       },
     },
@@ -61,11 +61,11 @@ export function generateRecommendations(
       current: score.activity,
       max: MAX_POINTS.activity,
       build: {
-        emoji: '🔥',
+        glyph: '▸',
         title: score.activity === 0 ? 'Push a commit this week' : 'Stay consistent',
         detail: score.activity === 0
           ? 'Push in the next 7 days to unlock the Consistent badge (+150 pts max).'
-          : `Each repo updated in the last 90 days adds 15 pts. ${MAX_POINTS.activity - score.activity} pts more possible.`,
+          : `Repos touched this week are worth 4x ones last updated 3 months ago. ${MAX_POINTS.activity - score.activity} pts more possible.`,
         impactPoints: MAX_POINTS.activity - score.activity,
       },
     },
@@ -74,7 +74,7 @@ export function generateRecommendations(
       current: score.diversity,
       max: MAX_POINTS.diversity,
       build: {
-        emoji: '🌐',
+        glyph: '◈',
         title: `Try ${Math.ceil((MAX_POINTS.diversity - score.diversity) / 20)} more language(s)`,
         detail: `Each language adds 20 pts. 5 languages unlock the Polyglot badge (+150 pts max).`,
         impactPoints: MAX_POINTS.diversity - score.diversity,

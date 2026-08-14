@@ -3,6 +3,7 @@
 import { useMemo } from 'react';
 import type { GitHubUser, GitHubRepo, ScoreBreakdown, Recommendation } from '../types.js';
 import { generateRecommendations } from '../lib/recommendations.js';
+import './Recommendations.css';
 
 interface Props {
   user: GitHubUser;
@@ -21,17 +22,17 @@ export default function Recommendations({ user, repos, score }: Props) {
   return (
     <div className="recommendations">
       <h3 className="recommendations-header">
-        <span className="tip-icon">💡</span> Tips to level up
+        <span className="recommendations-eyebrow">Recommendations //</span>
       </h3>
       <div className="recommendations-grid">
         {recs.map((rec, i) => (
           <div key={i} className="rec-card">
-            <span className="rec-emoji">{rec.emoji}</span>
+            <span className="rec-glyph">{rec.glyph}</span>
             <div className="rec-body">
               <span className="rec-title">{rec.title}</span>
               <span className="rec-detail">{rec.detail}</span>
             </div>
-            <span className="rec-impact">≈ +{rec.impactPoints} pts</span>
+            <span className="rec-impact">+{rec.impactPoints} pts</span>
           </div>
         ))}
       </div>

@@ -1,0 +1,147 @@
+/* RecentActivity.css — x.ai dark feed panel.
+   All values reference tokens in src/index.css. Every rule is prefixed
+   with `:root` (higher specificity than bare shell/component classes)
+   so it wins regardless of CSS import order. */
+
+:root .recent-activity {
+  margin: 0;
+}
+
+/* ---- Panel shell ---- */
+:root .ra-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+:root .ra-eyebrow {
+  margin: 0;
+  padding: 0.875rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* ---- Event rows ---- */
+:root .ra-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+}
+
+:root .ra-item {
+  margin: 0;
+  border-bottom: 1px solid var(--border);
+}
+
+:root .ra-item:last-child {
+  border-bottom: none;
+}
+
+:root .ra-link {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 0.75rem 1.25rem;
+  color: var(--text);
+  transition: background var(--dur) var(--ease);
+}
+
+:root .ra-link:hover {
+  background: var(--ghost);
+  color: var(--text);
+}
+
+/* Glyph tile — bordered mono square, token-mapped per-type accents */
+:root .ra-icon {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  line-height: 1;
+  color: var(--text);
+}
+
+:root .ra-icon[data-type='PullRequestEvent'] { color: var(--rank-s-plus); }
+:root .ra-icon[data-type='IssuesEvent'] { color: var(--rank-c); }
+:root .ra-icon[data-type='CreateEvent'] { color: var(--signal); }
+:root .ra-icon[data-type='WatchEvent'] { color: var(--rank-b); }
+:root .ra-icon[data-type='Other'] { color: var(--dim); }
+
+/* Text block — mono repo over muted summary */
+:root .ra-body {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+:root .ra-repo {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+:root .ra-summary {
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Timestamp — mono, dim, right-aligned */
+:root .ra-time {
+  flex: 0 0 auto;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--dim);
+  text-align: right;
+}
+
+/* ---- Loading / empty states ---- */
+:root .ra-loading {
+  margin: 0;
+  padding: 1rem 1.25rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+:root .ra-empty {
+  margin: 0;
+  padding: 1rem 1.25rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+
+/* ---- Motion safety ---- */
+@media (prefers-reduced-motion: reduce) {
+  :root .ra-link {
+    transition: none;
+  }
+}

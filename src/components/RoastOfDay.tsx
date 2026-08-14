@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import type { RoastResult } from '../types.js';
+import './RoastOfDay.css';
 
 interface RoastOfDayPayload {
   login: string;
@@ -35,21 +36,37 @@ export default function RoastOfDay({ onPick }: Props) {
   if (data === undefined) {
     return (
       <div className="roast-of-day">
-        <p className="roast-of-day-target">Loading today's roast…</p>
+        <div className="roast-of-day-header">
+          <span className="roast-of-day-dot" aria-hidden="true" />
+          <span className="roast-of-day-kicker">ROAST OF THE DAY //</span>
+        </div>
+        <p className="roast-of-day-loading">Loading today's roast…</p>
       </div>
     );
   }
 
   if (data === null) {
-    return null;
+    return (
+      <div className="roast-of-day">
+        <div className="roast-of-day-header">
+          <span className="roast-of-day-dot" aria-hidden="true" />
+          <span className="roast-of-day-kicker">ROAST OF THE DAY //</span>
+        </div>
+        <p className="roast-of-day-error">Roast feed unavailable. Check back later.</p>
+      </div>
+    );
   }
 
   const firstLine = data.roast.lines[0] ?? data.roast.overall;
 
   return (
     <div className="roast-of-day">
+      <div className="roast-of-day-header">
+        <span className="roast-of-day-dot" aria-hidden="true" />
+        <span className="roast-of-day-kicker">ROAST OF THE DAY //</span>
+      </div>
       <p className="roast-of-day-target">
-        TARGET:{' '}
+        <span className="roast-of-day-target-label">TARGET</span>
         <a
           href={`https://github.com/${data.login}`}
           target="_blank"
@@ -64,7 +81,10 @@ export default function RoastOfDay({ onPick }: Props) {
         </a>
       </p>
       <p className="roast-of-day-line">{firstLine}</p>
-      <p className="roast-of-day-overall">» {data.roast.overall}</p>
+      <p className="roast-of-day-overall">
+        <span className="roast-of-day-arrow" aria-hidden="true">▸</span>
+        {data.roast.overall}
+      </p>
     </div>
   );
 }

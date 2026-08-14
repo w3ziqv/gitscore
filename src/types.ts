@@ -38,7 +38,7 @@ export interface LanguageStat {
 export interface Badge {
   id: string;
   name: string;
-  emoji: string;
+  glyph: string;
   description: string;
   earned: boolean;
 }
@@ -109,7 +109,7 @@ export interface RecentActivity {
 }
 
 export interface Recommendation {
-  emoji: string;
+  glyph: string;
   title: string;
   detail: string;
   impactPoints: number;

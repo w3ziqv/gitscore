@@ -115,9 +115,34 @@ describe('calculateScore', () => {
   });
 
   it('caps stars score at 300', () => {
-    const repos = [makeRepo({ stargazers_count: 500 })];
+    const repos = [makeRepo({ stargazers_count: 1000 })];
     const score = calculateScore(makeUser(), repos, []);
     expect(score.stars).toBe(300);
+  });
+
+  it('stars score is logarithmic, not linear', () => {
+    const ten = calculateScore(makeUser(), [makeRepo({ stargazers_count: 10 })], []);
+    const hundred = calculateScore(makeUser(), [makeRepo({ stargazers_count: 100 })], []);
+    expect(ten.stars).toBeGreaterThan(0);
+    expect(hundred.stars).toBeGreaterThan(ten.stars);
+    // 10x more stars must NOT mean 10x the score (was linear before).
+    expect(hundred.stars).toBeLessThan(ten.stars * 10);
+  });
+
+  it('fresh activity earns more than stale repos', () => {
+    const daysAgo = (days: number) => new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
+    const fresh = calculateScore(
+      makeUser(),
+      [makeRepo({ updated_at: daysAgo(3) })],
+      [],
+    );
+    const stale = calculateScore(
+      makeUser(),
+      [makeRepo({ updated_at: daysAgo(120) })],
+      [],
+    );
+    expect(fresh.activity).toBeGreaterThan(stale.activity);
+    expect(stale.activity).toBe(0);
   });
 
   it('caps followers score at 200', () => {

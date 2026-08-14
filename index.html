@@ -4,23 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="GitScore — Analyze any GitHub profile. Get a hotness score, badges, language breakdown, and a roast.">
-  <meta name="theme-color" content="#fbfbf8">
+  <meta name="theme-color" content="#000000">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <title>GitScore — GitHub Profile Analyzer</title>
-  <script>
-    (function () {
-      try {
-        var stored = localStorage.getItem('gitscore:theme');
-        var VALID = ['light', 'dark', 'synthwave', 'terminal-green', 'paper'];
-        var theme = stored && VALID.indexOf(stored) !== -1
-          ? stored
-          : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-        document.documentElement.setAttribute('data-theme', theme);
-      } catch (e) {
-        document.documentElement.setAttribute('data-theme', 'light');
-      }
-    })();
-  </script>
 </head>
 <body>
   <div id="root"></div>

@@ -1,4 +1,5 @@
 import type { LanguageStat } from '../types.js';
+import './LanguageChart.css';
 
 interface Props {
   languages: LanguageStat[];
@@ -12,9 +13,9 @@ const LANG_COLORS: Record<string, string> = {
   Go: '#44ba82',
   Swift: '#ffaf01',
   HTML: '#e51300',
-  CSS: '#151524',
+  CSS: '#4f5b70', // lightened from #151524 so it reads on the dark surface
   Java: '#ff5229',
-  'C++': '#151524',
+  'C++': '#5c6b86', // lightened from #151524 so it reads on the dark surface
   C: '#6d6d78',
   'C#': '#44ba82',
   Ruby: '#e51300',
@@ -35,7 +36,9 @@ export default function LanguageChart({ languages }: Props) {
   if (languages.length === 0) {
     return (
       <div className="language-chart">
-        <h3>Languages</h3>
+        <h3 className="lang-eyebrow">
+          Languages <span aria-hidden="true">//</span>
+        </h3>
         <p className="no-data">No language data available.</p>
       </div>
     );
@@ -45,7 +48,9 @@ export default function LanguageChart({ languages }: Props) {
 
   return (
     <div className="language-chart">
-      <h3>Languages</h3>
+      <h3 className="lang-eyebrow">
+        Languages <span aria-hidden="true">//</span>
+      </h3>
       <div className="lang-bar-container">
         {top.map(lang => (
           <div

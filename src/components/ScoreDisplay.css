@@ -1,0 +1,192 @@
+/* ScoreDisplay.css — x.ai dark score panel. All tokens from src/index.css. */
+
+.sd-display {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 2rem;
+  align-items: stretch;
+  padding: 2rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+/* ============ Hero — the number panel ============ */
+
+.sd-hero {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 220px;
+  padding: 2.5rem 2rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border-strong);
+}
+
+/* Progress-to-1000 accent line — width animates with the count-up */
+.sd-hero-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 2px;
+  width: 0;
+}
+
+.sd-hero-body {
+  position: relative;
+  text-align: center;
+}
+
+.sd-micro {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.sd-micro-label {
+  display: block;
+  color: var(--dim);
+  margin-bottom: 0.875rem;
+}
+
+.sd-number {
+  display: block;
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: clamp(3rem, 7vw, 4.25rem);
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.sd-number-pop {
+  animation: sd-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes sd-pop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+
+.sd-hero-meta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.875rem;
+  margin-top: 1.25rem;
+}
+
+.sd-rank {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.sd-gen {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--dim);
+  padding-left: 0.875rem;
+  border-left: 1px solid var(--border);
+}
+
+/* ============ Breakdown — mono labels + hairline tracks ============ */
+
+.sd-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.sd-breakdown-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 0.125rem;
+}
+
+.sd-head-label {
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  color: var(--muted);
+}
+
+.sd-head-max {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.06em;
+  color: var(--dim);
+}
+
+.sd-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.sd-row-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.sd-label {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.sd-value {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.sd-track {
+  height: 1px;
+  background: var(--ghost);
+}
+
+.sd-fill {
+  height: 1px;
+  background: var(--text);
+  transition: width 0.6s var(--ease);
+}
+
+/* ============ Sparkline — transparent, 1px stroke ============ */
+
+.sd-sparkline {
+  display: block;
+  width: 100%;
+  height: 36px;
+  margin-top: 0.75rem;
+}
+
+/* ============ Responsive ============ */
+
+@media (max-width: 640px) {
+  .sd-display {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    padding: 1.5rem;
+  }
+
+  .sd-hero {
+    min-width: 0;
+  }
+}

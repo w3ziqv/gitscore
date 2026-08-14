@@ -6,7 +6,7 @@ import { calculateTotalStars } from './score.js';
 export interface FunStat {
   label: string;
   value: string;
-  emoji: string;
+  glyph: string;
 }
 
 export function calculateFunStats(user: GitHubUser, repos: GitHubRepo[], score: ScoreBreakdown): FunStat[] {
@@ -19,35 +19,35 @@ export function calculateFunStats(user: GitHubUser, repos: GitHubRepo[], score: 
   stats.push({
     label: 'Account age',
     value: `${accountAgeYears} years`,
-    emoji: '🎂',
+    glyph: '◷',
   });
 
   const reposPerYear = accountAgeDays > 0 ? (user.public_repos / (accountAgeDays / 365.25)).toFixed(1) : '0';
   stats.push({
     label: 'Repos per year',
     value: reposPerYear,
-    emoji: '📦',
+    glyph: '▣',
   });
 
   const starsPerRepo = nonForkedRepos.length > 0 ? (totalStars / nonForkedRepos.length).toFixed(1) : '0';
   stats.push({
     label: 'Avg stars per repo',
     value: starsPerRepo,
-    emoji: '⭐',
+    glyph: '★',
   });
 
   const followerToFollowingRatio = user.following > 0 ? (user.followers / user.following).toFixed(1) : '∞';
   stats.push({
     label: 'Follower ratio',
     value: `${followerToFollowingRatio}x`,
-    emoji: '👥',
+    glyph: '◐',
   });
 
   const languages = new Set(repos.filter(r => !r.fork && r.language).map(r => r.language));
   stats.push({
     label: 'Languages spoken',
     value: String(languages.size),
-    emoji: '🌐',
+    glyph: '◈',
   });
 
   const mostStarredRepo = nonForkedRepos.sort((a, b) => b.stargazers_count - a.stargazers_count)[0];
@@ -55,7 +55,7 @@ export function calculateFunStats(user: GitHubUser, repos: GitHubRepo[], score: 
     stats.push({
       label: 'Most popular repo',
       value: mostStarredRepo.name,
-      emoji: '🏆',
+      glyph: '◆',
     });
   }
 
@@ -65,12 +65,12 @@ export function calculateFunStats(user: GitHubUser, repos: GitHubRepo[], score: 
     stats.push({
       label: 'Dustiest repo',
       value: oldestRepo.name,
-      emoji: '🕸️',
+      glyph: '▧',
     });
     stats.push({
       label: 'Days since last push',
       value: String(daysSinceUpdate),
-      emoji: '⏰',
+      glyph: '◔',
     });
   }
 
@@ -79,14 +79,14 @@ export function calculateFunStats(user: GitHubUser, repos: GitHubRepo[], score: 
     stats.push({
       label: 'Star-to-fan ratio',
       value: `${starPowerRatio}x`,
-      emoji: '✨',
+      glyph: '◉',
     });
   }
 
   stats.push({
     label: 'GitHub net worth',
     value: `${score.total} pts`,
-    emoji: '💎',
+    glyph: '❖',
   });
 
   return stats;

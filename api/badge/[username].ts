@@ -54,14 +54,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 function badgeError(login: string): string {
   // Hard-edge placeholder rank "F" + score "?".
   return `<svg xmlns="http://www.w3.org/2000/svg" width="220" height="44" viewBox="0 0 220 44" shape-rendering="crispEdges">
-  <rect x="0" y="0" width="220" height="44" fill="#fbfbf8" stroke="#151524" stroke-width="2"/>
+  <rect x="0" y="0" width="220" height="44" fill="#0e0e0e" stroke="#f0f0fa" stroke-width="1"/>
   <rect x="2" y="2" width="6" height="40" fill="#484f58"/>
-  <text x="14" y="14" font-family="monospace" font-size="9" font-weight="700" fill="#6d6d78" letter-spacing="1"># GITScore</text>
-  <text x="14" y="34" font-family="monospace" font-size="13" font-weight="700" fill="#151524">${escapeXml(login || 'unknown')}</text>
-  <text x="160" y="14" font-family="monospace" font-size="9" font-weight="700" fill="#6d6d78" letter-spacing="1">RANK</text>
+  <text x="14" y="14" font-family="monospace" font-size="9" font-weight="700" fill="#9d9d9d" letter-spacing="2"># GITSCORE</text>
+  <text x="14" y="34" font-family="monospace" font-size="13" font-weight="700" fill="#f0f0fa">${escapeXml(login || 'unknown')}</text>
+  <text x="160" y="14" font-family="monospace" font-size="9" font-weight="700" fill="#9d9d9d" letter-spacing="2">RANK</text>
   <text x="160" y="34" font-family="monospace" font-size="14" font-weight="700" fill="#484f58">?</text>
-  <text x="190" y="14" font-family="monospace" font-size="9" font-weight="700" fill="#6d6d78" letter-spacing="1">SCORE</text>
-  <text x="190" y="34" font-family="monospace" font-size="14" font-weight="700" fill="#151524">N/A</text>
+  <text x="190" y="14" font-family="monospace" font-size="9" font-weight="700" fill="#9d9d9d" letter-spacing="2">SCORE</text>
+  <text x="190" y="34" font-family="monospace" font-size="14" font-weight="700" fill="#f0f0fa">N/A</text>
 </svg>`;
 }
 

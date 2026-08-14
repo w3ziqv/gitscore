@@ -3,7 +3,7 @@
 //   - Most improved  (F6 — score-delta over window)
 //   - Squad          (F7 — pinned friends, localStorage)
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type CSSProperties } from 'react';
 import type { ImprovedLeaderboardEntry, LeaderboardEntry, ScoreRank } from '../types.js';
 import { readLocalLeaderboard, mergeLeaderboards } from '../lib/localLeaderboard.js';
 import {
@@ -11,6 +11,7 @@ import {
   readSquad,
   removeSquadMember,
 } from '../lib/squad.js';
+import './LeaderboardView.css';
 
 interface Props {
   onSearch: (username: string) => void;
@@ -19,15 +20,23 @@ interface Props {
 type Tab = 'global' | 'improved' | 'squad';
 type WindowDays = 7 | 30;
 
+// Rank chip colors reference the design-system tokens (index.css) —
+// the hex values live there, this map only routes rank → token.
 const RANK_COLORS: Record<string, string> = {
-  'S+': '#f85149',
-  'S': '#f0883e',
-  'A': '#ffa657',
-  'B': '#d29922',
-  'C': '#a5d6ff',
-  'D': '#7d8590',
-  'F': '#484f58',
+  'S+': 'var(--rank-s-plus)',
+  'S': 'var(--rank-s)',
+  'A': 'var(--rank-a)',
+  'B': 'var(--rank-b)',
+  'C': 'var(--rank-c)',
+  'D': 'var(--rank-d)',
+  'F': 'var(--rank-f)',
 };
+
+/** Rank chip style — the only presentation value kept inline is the
+ *  data-driven rank color; typography/borders live in LeaderboardView.css. */
+function rankChip(rank: ScoreRank): CSSProperties {
+  return { '--rank-color': RANK_COLORS[rank] ?? 'var(--muted)' } as CSSProperties;
+}
 
 function relativeTime(ms: number): string {
   const diff = Date.now() - ms;
@@ -133,55 +142,59 @@ export default function LeaderboardView({ onSearch }: Props) {
 
   return (
     <main className="main-content">
-      <div className="leaderboard-tabs" role="tablist">
-        <button
-          role="tab"
-          className={`leaderboard-tab ${tab === 'global' ? 'active' : ''}`}
-          onClick={() => setTab('global')}
-        >
-          Global
-        </button>
-        <button
-          role="tab"
-          className={`leaderboard-tab ${tab === 'improved' ? 'active' : ''}`}
-          onClick={() => setTab('improved')}
-        >
-          Most improved
-        </button>
-        <button
-          role="tab"
-          className={`leaderboard-tab ${tab === 'squad' ? 'active' : ''}`}
-          onClick={() => setTab('squad')}
-        >
-          Squad
-        </button>
-      </div>
+      <section className="lb-panel">
+        <header className="lb-header">
+          <span className="lb-eyebrow">Leaderboard //</span>
+          <div className="lb-header-row">
+            <div className="lb-tabs" role="tablist">
+              <button
+                role="tab"
+                className={`lb-tab ${tab === 'global' ? 'active' : ''}`}
+                onClick={() => setTab('global')}
+              >
+                Global
+              </button>
+              <button
+                role="tab"
+                className={`lb-tab ${tab === 'improved' ? 'active' : ''}`}
+                onClick={() => setTab('improved')}
+              >
+                Most improved
+              </button>
+              <button
+                role="tab"
+                className={`lb-tab ${tab === 'squad' ? 'active' : ''}`}
+                onClick={() => setTab('squad')}
+              >
+                Squad
+              </button>
+            </div>
 
-      {tab === 'improved' && (
-        <div className="squad-controls" style={{ marginBottom: '1rem' }}>
-          <button
-            className="leaderboard-tab"
-            onClick={() => setWindowDays(7)}
-            style={{ background: windowDays === 7 ? 'var(--text)' : 'var(--bg)', color: windowDays === 7 ? 'var(--orange)' : 'var(--text)' }}
-          >
-            7 days
-          </button>
-          <button
-            className="leaderboard-tab"
-            onClick={() => setWindowDays(30)}
-            style={{ background: windowDays === 30 ? 'var(--text)' : 'var(--bg)', color: windowDays === 30 ? 'var(--orange)' : 'var(--text)' }}
-          >
-            30 days
-          </button>
-        </div>
-      )}
+            {tab === 'improved' && (
+              <div className="lb-window" role="group" aria-label="Window">
+                <button
+                  className={`lb-window-btn${windowDays === 7 ? ' active' : ''}`}
+                  onClick={() => setWindowDays(7)}
+                >
+                  7d
+                </button>
+                <button
+                  className={`lb-window-btn${windowDays === 30 ? ' active' : ''}`}
+                  onClick={() => setWindowDays(30)}
+                >
+                  30d
+                </button>
+              </div>
+            )}
+          </div>
+        </header>
 
       {tab !== 'squad' && loading && (
         <div className="loading">Loading leaderboard…</div>
       )}
 
       {tab === 'squad' && (
-        <div className="leaderboard">
+        <>
           <div className="squad-controls">
             <input
               className="squad-input"
@@ -201,18 +214,18 @@ export default function LeaderboardView({ onSearch }: Props) {
             </button>
           </div>
           {squad.length === 0 ? (
-            <p className="loading">Pin a few logins above to see your squad here.</p>
+            <p className="lb-empty-note">Pin a few logins above to see your squad here.</p>
           ) : (
-            <ol className="leaderboard-list">
+            <ol className="lb-list">
               {Array.from(new Set(squad)).map(login => {
                 const local = globalEntries.find(e => e.login.toLowerCase() === login.toLowerCase());
                 return (
                   <li
                     key={login}
-                    className="leaderboard-row"
+                    className="lb-row"
                     onClick={() => onSearch(login)}
                   >
-                    <span className="lb-rank-num">·</span>
+                    <span className="lb-rank-num">—</span>
                     {local && (
                       <img
                         src={local.avatar_url}
@@ -226,10 +239,7 @@ export default function LeaderboardView({ onSearch }: Props) {
                       <>
                         <span
                           className="lb-rank-badge"
-                          style={{
-                            color: RANK_COLORS[local.rank] ?? 'var(--text-muted)',
-                            borderColor: RANK_COLORS[local.rank] ?? 'var(--border)',
-                          }}
+                          style={rankChip(local.rank)}
                         >
                           {local.rank}
                         </span>
@@ -240,37 +250,80 @@ export default function LeaderboardView({ onSearch }: Props) {
                       <span className="lb-meta">analyze first →</span>
                     )}
                     <button
-                      className="squad-remove"
+                      className="lb-remove"
+                      aria-label={`Remove ${login} from squad`}
                       onClick={e => {
                         e.stopPropagation();
                         handleRemoveSquad(login);
                       }}
                     >
-                      ✕
+                      ×
                     </button>
                   </li>
                 );
               })}
             </ol>
           )}
-        </div>
+        </>
       )}
 
       {tab === 'global' && !loading && globalEntries.length === 0 && (
-        <div className="empty-state">
-          <div className="empty-icon">🏆</div>
+        <div className="empty-state lb-empty">
+          <div className="lb-empty-mark" aria-hidden="true">◇</div>
           <p>No profiles analyzed yet. Search a profile to populate the leaderboard.</p>
         </div>
       )}
 
       {tab === 'global' && !loading && globalEntries.length > 0 && (
-        <div className="leaderboard">
-          <h2 className="leaderboard-title">Leaderboard</h2>
-          <ol className="leaderboard-list">
-            {globalEntries.map((entry, i) => (
+        <ol className="lb-list">
+          {globalEntries.map((entry, i) => (
+            <li
+              key={entry.login}
+              className="lb-row"
+              onClick={() => onSearch(entry.login)}
+            >
+              <span className="lb-rank-num">#{i + 1}</span>
+              <img
+                src={entry.avatar_url}
+                alt={entry.login}
+                className="lb-avatar"
+                loading="lazy"
+              />
+              <span className="lb-login">{entry.login}</span>
+              <span
+                className="lb-rank-badge"
+                style={rankChip(entry.rank)}
+              >
+                {entry.rank}
+              </span>
+              <span className="lb-score">{entry.score}</span>
+              <span className="lb-meta lb-stars">◇ {entry.totalStars}</span>
+              <span className="lb-meta lb-badges">▸ {entry.badgesEarned}</span>
+              <span className="lb-time">{relativeTime(entry.analyzedAtMs)}</span>
+            </li>
+          ))}
+        </ol>
+      )}
+
+      {tab === 'improved' && !loading && improvedEntries.length === 0 && (
+        <div className="empty-state lb-empty">
+          <div className="lb-empty-mark" aria-hidden="true">▸</div>
+          <p>
+            No score movement yet — analyze the same profile on different days to
+            build score history for the &quot;most improved&quot; tab.
+          </p>
+        </div>
+      )}
+
+      {tab === 'improved' && !loading && improvedEntries.length > 0 && (
+        <ol className="lb-list">
+          {improvedEntries.map((entry, i) => {
+            const deltaCls = entry.delta > 0 ? 'up' : entry.delta < 0 ? 'down' : '';
+            const deltaStr = entry.delta >= 0 ? `+${entry.delta}` : `${entry.delta}`;
+            return (
               <li
                 key={entry.login}
-                className="leaderboard-row"
+                className="lb-row"
                 onClick={() => onSearch(entry.login)}
               >
                 <span className="lb-rank-num">#{i + 1}</span>
@@ -283,72 +336,19 @@ export default function LeaderboardView({ onSearch }: Props) {
                 <span className="lb-login">{entry.login}</span>
                 <span
                   className="lb-rank-badge"
-                  style={{
-                    color: RANK_COLORS[entry.rank] ?? 'var(--text-muted)',
-                    borderColor: RANK_COLORS[entry.rank] ?? 'var(--border)',
-                  }}
+                  style={rankChip(entry.rank)}
                 >
                   {entry.rank}
                 </span>
                 <span className="lb-score">{entry.score}</span>
-                <span className="lb-meta">★ {entry.totalStars}</span>
-                <span className="lb-meta">🏅 {entry.badgesEarned}</span>
+                <span className={`lb-delta ${deltaCls}`}>{deltaStr}</span>
                 <span className="lb-time">{relativeTime(entry.analyzedAtMs)}</span>
               </li>
-            ))}
-          </ol>
-        </div>
+            );
+          })}
+        </ol>
       )}
-
-      {tab === 'improved' && !loading && improvedEntries.length === 0 && (
-        <div className="empty-state">
-          <div className="empty-icon">📈</div>
-          <p>
-            No score movement yet — analyze the same profile on different days to
-            build score history for the &quot;most improved&quot; tab.
-          </p>
-        </div>
-      )}
-
-      {tab === 'improved' && !loading && improvedEntries.length > 0 && (
-        <div className="leaderboard">
-          <h2 className="leaderboard-title">Most improved · {windowDays}d</h2>
-          <ol className="leaderboard-list">
-            {improvedEntries.map((entry, i) => {
-              const deltaCls = entry.delta > 0 ? 'up' : entry.delta < 0 ? 'down' : '';
-              const deltaStr = entry.delta >= 0 ? `+${entry.delta}` : `${entry.delta}`;
-              return (
-                <li
-                  key={entry.login}
-                  className="leaderboard-row"
-                  onClick={() => onSearch(entry.login)}
-                >
-                  <span className="lb-rank-num">#{i + 1}</span>
-                  <img
-                    src={entry.avatar_url}
-                    alt={entry.login}
-                    className="lb-avatar"
-                    loading="lazy"
-                  />
-                  <span className="lb-login">{entry.login}</span>
-                  <span
-                    className="lb-rank-badge"
-                    style={{
-                      color: RANK_COLORS[entry.rank] ?? 'var(--text-muted)',
-                      borderColor: RANK_COLORS[entry.rank] ?? 'var(--border)',
-                    }}
-                  >
-                    {entry.rank}
-                  </span>
-                  <span className="lb-score">{entry.score}</span>
-                  <span className={`lb-delta ${deltaCls}`}>{deltaStr}</span>
-                  <span className="lb-time">{relativeTime(entry.analyzedAtMs)}</span>
-                </li>
-              );
-            })}
-          </ol>
-        </div>
-      )}
+    </section>
     </main>
   );
 }

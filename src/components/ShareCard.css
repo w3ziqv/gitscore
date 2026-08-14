@@ -1,0 +1,65 @@
+/* ShareCard.css — share/embed controls, x.ai dark (scoped, token-driven). */
+
+.share-card-section {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.share-card-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.share-card-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+
+:root .share-card-section .share-btn,
+:root .share-card-section .embed-btn {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 0;
+  padding: 8px 14px;
+  transition:
+    background var(--dur) var(--ease),
+    border-color var(--dur) var(--ease),
+    color var(--dur) var(--ease);
+}
+
+:root .share-card-section .share-btn:hover,
+:root .share-card-section .embed-btn:hover {
+  background: var(--ghost);
+  border-color: var(--ghost-border);
+  color: var(--text);
+}
+
+:root .share-card-section .embed-btn:active {
+  background: var(--ghost-strong);
+}
+
+:root .share-card-section .embed-btn.copied {
+  color: var(--signal);
+  border-color: var(--signal);
+}
+
+:root .share-card-section .embed-btn.copied:hover {
+  background: var(--ghost);
+  border-color: var(--signal);
+}

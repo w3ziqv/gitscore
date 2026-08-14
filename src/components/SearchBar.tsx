@@ -29,7 +29,7 @@ export default function SearchBar({ onSearch, loading }: Props) {
         />
       </div>
       <button type="submit" className="search-btn" disabled={loading || !value.trim()}>
-        {loading ? 'Analyzing...' : 'Analyze'}
+        {loading ? 'ANALYZING' : 'ANALYZE'}
       </button>
     </form>
   );

@@ -2,6 +2,7 @@
 
 import type { Badge, GitHubUser, GitHubRepo } from '../types.js';
 import { calculateTotalStars, extractLanguages } from '../lib/score.js';
+import './AchievementProgress.css';
 
 interface Props {
   badges: Badge[];
@@ -38,15 +39,15 @@ export default function AchievementProgress({ badges, user, repos }: Props) {
   if (unearned.length === 0) {
     return (
       <div className="achievement-progress">
-        <h3>Achievement Progress</h3>
-        <p className="all-earned">All badges earned! 🏆</p>
+        <p className="progress-eyebrow">ACHIEVEMENTS //</p>
+        <p className="all-earned">▸ ALL BADGES EARNED</p>
       </div>
     );
   }
 
   return (
     <div className="achievement-progress">
-      <h3>Achievement Progress</h3>
+      <p className="progress-eyebrow">ACHIEVEMENTS //</p>
       <div className="progress-list">
         {unearned.map(badge => {
           const { current, target } = getBadgeProgress(badge, user, repos);
@@ -55,13 +56,15 @@ export default function AchievementProgress({ badges, user, repos }: Props) {
           return (
             <div key={badge.id} className="progress-row">
               <div className="progress-header">
-                <span className="progress-emoji">{badge.emoji}</span>
+                <span className="progress-glyph">{badge.glyph}</span>
                 <span className="progress-name">{badge.name}</span>
                 <span className="progress-numbers">{current} / {target}</span>
               </div>
+              <p className="progress-description">{badge.description}</p>
               <div className="progress-bar-track">
                 <div className="progress-bar-fill" style={{ width: `${pct}%` }} />
               </div>
+              <span className="progress-pct">{pct}%</span>
             </div>
           );
         })}

@@ -3,6 +3,7 @@
 import { useRef, useCallback, useState } from 'react';
 import type { ProfileAnalysis } from '../types.js';
 import { getScoreRank } from '../lib/score.js';
+import './ShareCard.css';
 
 interface Props {
   analysis: ProfileAnalysis;
@@ -14,64 +15,22 @@ interface ThemeColors {
   textMuted: string;
   textSecondary: string;
   barTrack: string;
+  barFill: string;
   badgeBg: string;
   footer: string;
 }
 
+// Single x.ai dark palette — mirrors the design-system tokens in index.css.
 function getThemeColors(): ThemeColors {
-  const theme = document.documentElement.getAttribute('data-theme');
-  if (theme === 'dark') {
-    return {
-      bg: '#0c0c14',
-      text: '#f5f5f0',
-      textMuted: '#8a8a98',
-      textSecondary: '#c0c0cc',
-      barTrack: '#262635',
-      badgeBg: '#16161f',
-      footer: '#5a5a6a',
-    };
-  }
-  if (theme === 'synthwave') {
-    return {
-      bg: '#1b0a3a',
-      text: '#fee5ff',
-      textMuted: '#8a64a8',
-      textSecondary: '#cf8de8',
-      barTrack: '#3a1a78',
-      badgeBg: '#2a0e57',
-      footer: '#5a4080',
-    };
-  }
-  if (theme === 'terminal-green') {
-    return {
-      bg: '#02110a',
-      text: '#c9ffe4',
-      textMuted: '#4f9670',
-      textSecondary: '#95e4b8',
-      barTrack: '#08321a',
-      badgeBg: '#04210f',
-      footer: '#1f7a3a',
-    };
-  }
-  if (theme === 'paper') {
-    return {
-      bg: '#ede5d2',
-      text: '#1f1a10',
-      textMuted: '#6a5a3f',
-      textSecondary: '#3a2f1f',
-      barTrack: '#e0d6ba',
-      badgeBg: '#f3eddc',
-      footer: '#3a2f1f',
-    };
-  }
   return {
-    bg: '#fbfbf8',
-    text: '#151524',
-    textMuted: '#6d6d78',
-    textSecondary: '#343446',
-    barTrack: '#ebe9e0',
-    badgeBg: '#f5f4ef',
-    footer: '#c9c9c4',
+    bg: '#0e0e0e',
+    text: '#f0f0fa',
+    textMuted: '#9d9d9d',
+    textSecondary: '#f0f0fa',
+    barTrack: '#161616',
+    barFill: '#6b6b6b',
+    badgeBg: '#161616',
+    footer: '#6b6b6b',
   };
 }
 
@@ -97,12 +56,14 @@ export default function ShareCard({ analysis }: Props) {
     ctx.fillStyle = c.bg;
     ctx.fillRect(0, 0, W, H);
 
+    const rank = getScoreRank(analysis.score.total);
+
     // Hard Mistral: 8px block stripe instead of 8px soft column.
-    ctx.fillStyle = '#ff5229';
+    ctx.fillStyle = rank.color;
     ctx.fillRect(0, 0, 8, H);
 
     ctx.fillStyle = c.text;
-    ctx.font = '700 32px "Space Mono", monospace';
+    ctx.font = '700 32px "JetBrains Mono", monospace';
     ctx.textAlign = 'left';
     ctx.fillText('# GitScore', 60, 80);
 
@@ -115,12 +76,11 @@ export default function ShareCard({ analysis }: Props) {
     ctx.fillText(analysis.user.name || analysis.user.login, 60, 180);
 
     ctx.fillStyle = c.textMuted;
-    ctx.font = '400 24px "Space Mono", monospace';
+    ctx.font = '400 24px "JetBrains Mono", monospace';
     ctx.fillText(`@${analysis.user.login}`, 60, 215);
 
-    const rank = getScoreRank(analysis.score.total);
     ctx.fillStyle = rank.color;
-    ctx.font = '700 120px "Space Mono", monospace';
+    ctx.font = '700 120px "JetBrains Mono", monospace';
     ctx.textAlign = 'right';
     ctx.fillText(String(analysis.score.total), W - 60, 200);
 
@@ -149,11 +109,11 @@ export default function ShareCard({ analysis }: Props) {
       ctx.fillStyle = c.barTrack;
       ctx.fillRect(barX, y, barW, barH);
 
-      ctx.fillStyle = '#ff5229';
+      ctx.fillStyle = c.barFill;
       ctx.fillRect(barX, y, (barW * breakdownValues[i]) / breakdownMax[i], barH);
 
       ctx.fillStyle = c.textMuted;
-      ctx.font = '700 14px "Space Mono", monospace';
+      ctx.font = '700 14px "JetBrains Mono", monospace';
       ctx.textAlign = 'right';
       ctx.fillText(String(breakdownValues[i]), barX + barW + 40, y + 7);
       ctx.textAlign = 'left';
@@ -170,9 +130,10 @@ export default function ShareCard({ analysis }: Props) {
       ctx.fillStyle = c.badgeBg;
       ctx.fillRect(badgeX, badgeStartY, badgeSize, badgeSize);
 
+      ctx.fillStyle = c.text;
       ctx.font = '28px sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText(badge.emoji, badgeX + badgeSize / 2, badgeStartY + 34);
+      ctx.fillText(badge.glyph, badgeX + badgeSize / 2, badgeStartY + 34);
       ctx.textAlign = 'left';
 
       badgeX += badgeSize + badgeGap;
@@ -216,16 +177,22 @@ export default function ShareCard({ analysis }: Props) {
 
   return (
     <div className="share-card-section">
-      <button className="share-btn" onClick={handleDownload}>
-        Download Share Card
-      </button>
-      <button
-        className={`embed-btn ${copied ? 'copied' : ''}`}
-        onClick={handleEmbedCopy}
-        title={`![GitScore](${window.location.origin}/api/badge/${analysis.user.login})`}
-      >
-        {copied ? 'Copied!' : 'Embed badge'}
-      </button>
+      <div className="share-card-group">
+        <span className="share-card-label">SHARE //</span>
+        <button className="share-btn" onClick={handleDownload}>
+          Download PNG
+        </button>
+      </div>
+      <div className="share-card-group">
+        <span className="share-card-label">EMBED</span>
+        <button
+          className={`embed-btn ${copied ? 'copied' : ''}`}
+          onClick={handleEmbedCopy}
+          title={`![GitScore](${window.location.origin}/api/badge/${analysis.user.login})`}
+        >
+          {copied ? 'Copied!' : 'Embed badge'}
+        </button>
+      </div>
       <canvas ref={canvasRef} style={{ display: 'none' }} />
       <a ref={linkRef} style={{ display: 'none' }} />
     </div>

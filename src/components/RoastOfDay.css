@@ -1,0 +1,125 @@
+/* RoastOfDay.css — x.ai-style live-feed card for the daily roast.
+   Scoped under `:root .roast-of-day` so these rules win regardless of
+   CSS import order and no stale App.css styling can leak in. */
+
+:root .roast-of-day {
+  display: grid;
+  gap: 10px;
+  padding: 14px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+/* Neutralize any legacy ribbon/decoration pseudo-elements on the card root. */
+:root .roast-of-day::before,
+:root .roast-of-day::after {
+  content: none !important;
+}
+
+/* ── header: mono uppercase kicker + signal status dot ─────────────────── */
+
+:root .roast-of-day-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 10px;
+}
+
+:root .roast-of-day-kicker {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+:root .roast-of-day-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--signal);
+  box-shadow: 0 0 8px var(--signal);
+  animation: roast-of-day-pulse 2.4s var(--ease) infinite;
+}
+
+@keyframes roast-of-day-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+/* ── target row: mono link that signals on hover ───────────────────────── */
+
+:root .roast-of-day-target {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+
+:root .roast-of-day-target-label {
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--dim);
+}
+
+:root .roast-of-day-target a {
+  font-weight: 700;
+  color: var(--text);
+  transition: color var(--dur) var(--ease);
+}
+
+:root .roast-of-day-target a:hover,
+:root .roast-of-day-target a:focus-visible {
+  color: var(--signal);
+}
+
+/* ── body lines ─────────────────────────────────────────────────────────── */
+
+:root .roast-of-day-line {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+:root .roast-of-day-loading {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--dim);
+}
+
+:root .roast-of-day-error {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--error);
+}
+
+/* ── verdict ────────────────────────────────────────────────────────────── */
+
+:root .roast-of-day-overall {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--muted);
+  border-top: 1px solid var(--border);
+  padding-top: 10px;
+}
+
+:root .roast-of-day-arrow {
+  color: var(--signal);
+  margin-right: 6px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root .roast-of-day-dot {
+    animation: none;
+  }
+}

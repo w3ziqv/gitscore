@@ -1,0 +1,80 @@
+/* ============================================================
+   ROAST PANEL — terminal output aesthetic (x.ai)
+   All selectors are scoped under `:root .roast-panel` so they
+   win over any stale .roast-* rules in App.css regardless of
+   import order. Colors/fonts reference tokens in src/index.css.
+   ============================================================ */
+
+:root .roast-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  font-family: var(--font-mono);
+  color: var(--text);
+  padding: 1.25rem 1.5rem 1.5rem;
+}
+
+/* ---- Header: mono uppercase with signal ▸ glyph ---- */
+:root .roast-panel .roast-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  line-height: 1;
+  color: var(--muted);
+}
+
+:root .roast-panel .roast-glyph {
+  color: var(--signal);
+  font-size: 0.8125rem;
+  line-height: 1;
+}
+
+/* ---- Roast lines: terminal output with prompt ---- */
+:root .roast-panel .roast-lines {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+:root .roast-panel .roast-lines li {
+  position: relative;
+  padding-left: 1.25rem;
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  line-height: 1.7;
+  color: var(--text);
+}
+
+:root .roast-panel .roast-lines li::before {
+  content: '>';
+  position: absolute;
+  left: 0;
+  font-weight: 700;
+  color: var(--signal);
+}
+
+/* ---- Overall verdict: mono uppercase block ---- */
+:root .roast-panel .roast-overall {
+  margin: 1.25rem 0 0;
+  padding-top: 0.875rem;
+  border-top: 1px solid var(--border);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+:root .roast-panel .roast-overall::before {
+  content: 'VERDICT // ';
+  color: var(--signal);
+}

@@ -1,0 +1,351 @@
+/* LeaderboardView — x.ai / SpaceX dark aesthetic.
+   Scoped under `:root ` (specificity 0,2,0) so these rules win over the
+   generic .empty-state / .loading rules in App.css, which is imported
+   later in the bundle (App.tsx imports components before './App.css').
+   All colors/fonts reference tokens in src/index.css. */
+
+/* ---- Panel shell ---- */
+:root .lb-panel {
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+:root .lb-header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.875rem;
+  padding: 1.25rem 1.25rem 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+:root .lb-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--dim);
+  white-space: nowrap;
+}
+
+:root .lb-header-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+/* ---- Segmented tabs (Global / Most improved / Squad) ---- */
+:root .lb-tabs {
+  display: inline-flex;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+}
+
+:root .lb-tab {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 0.5625rem 1rem;
+  border: none;
+  border-right: 1px solid var(--border);
+  background: transparent;
+  transition:
+    color var(--dur) var(--ease),
+    background var(--dur) var(--ease);
+}
+
+:root .lb-tab:last-child {
+  border-right: none;
+}
+
+:root .lb-tab:hover:not(.active) {
+  color: var(--text);
+  background: var(--ghost);
+}
+
+:root .lb-tab.active {
+  color: var(--text);
+  background: var(--ghost);
+  box-shadow: inset 0 0 0 1px var(--border-strong);
+}
+
+/* ---- Window toggle (7d / 30d) ---- */
+:root .lb-window {
+  display: inline-flex;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+}
+
+:root .lb-window-btn {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--dim);
+  padding: 0.5rem 0.875rem;
+  border: none;
+  border-right: 1px solid var(--border);
+  background: transparent;
+  transition:
+    color var(--dur) var(--ease),
+    background var(--dur) var(--ease);
+}
+
+:root .lb-window-btn:last-child {
+  border-right: none;
+}
+
+:root .lb-window-btn:hover:not(.active) {
+  color: var(--text);
+}
+
+:root .lb-window-btn.active {
+  color: var(--text);
+  background: var(--ghost);
+  box-shadow: inset 0 0 0 1px var(--border-strong);
+}
+
+/* ---- Rows ---- */
+:root .lb-list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+:root .lb-row {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 0.75rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+  background: transparent;
+  cursor: pointer;
+  transition: background var(--dur) var(--ease);
+}
+
+:root .lb-row:last-child {
+  border-bottom: none;
+}
+
+:root .lb-row:hover {
+  background: var(--ghost);
+}
+
+:root .lb-rank-num {
+  flex-shrink: 0;
+  min-width: 2.25rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  color: var(--dim);
+}
+
+:root .lb-avatar {
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  object-fit: cover;
+  background: var(--surface-2);
+  border: 1px solid var(--border-strong);
+}
+
+:root .lb-login {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--text);
+}
+
+/* Rank chip — border and letter take the rank token color. */
+:root .lb-rank-badge {
+  flex-shrink: 0;
+  min-width: 1.875rem;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--rank-color, var(--muted));
+  border: 1px solid var(--rank-color, var(--border));
+  padding: 0.3125rem 0.4375rem;
+  background: transparent;
+}
+
+:root .lb-score {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text);
+}
+
+:root .lb-meta {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--dim);
+  white-space: nowrap;
+}
+
+:root .lb-time {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.04em;
+  color: var(--dim);
+  white-space: nowrap;
+}
+
+/* Delta chip (improved tab) — signal / error per sign. */
+:root .lb-delta {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1;
+  padding: 0.3125rem 0.4375rem;
+  border: 1px solid var(--border);
+}
+
+:root .lb-delta.up {
+  color: var(--signal);
+  border-color: var(--signal);
+  border-color: color-mix(in srgb, var(--signal) 45%, transparent);
+}
+
+:root .lb-delta.down {
+  color: var(--error);
+  border-color: var(--error);
+  border-color: color-mix(in srgb, var(--error) 45%, transparent);
+}
+
+/* Squad remove (×) — small dim button. */
+:root .lb-remove {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  line-height: 1;
+  color: var(--dim);
+  border: 1px solid transparent;
+  background: transparent;
+  padding: 0.25rem 0.375rem;
+  transition:
+    color var(--dur) var(--ease),
+    border-color var(--dur) var(--ease),
+    background var(--dur) var(--ease);
+}
+
+:root .lb-remove:hover {
+  color: var(--text);
+  border-color: var(--border);
+  background: var(--ghost);
+}
+
+/* ---- Squad controls ---- */
+:root .squad-controls {
+  display: flex;
+  align-items: stretch;
+  gap: 0.5rem;
+  margin: 1rem 1.25rem 0.75rem;
+}
+
+:root .squad-input {
+  flex: 1;
+  min-width: 0;
+  padding: 0.625rem 0.75rem;
+  font-size: 0.8125rem;
+  background: var(--surface-2);
+}
+
+:root .squad-add-btn {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  padding: 0 1.125rem;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+}
+
+:root .squad-add-btn:hover {
+  border-color: var(--border-strong);
+  background: var(--ghost);
+}
+
+/* ---- Empty states (dim mono, no emoji) ---- */
+:root .lb-empty {
+  padding: 3rem 1rem;
+}
+
+:root .lb-empty-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  font-family: var(--font-mono);
+  font-size: 1.25rem;
+  line-height: 1;
+  color: var(--dim);
+  border: 1px solid var(--border-strong);
+  background: var(--surface-2);
+}
+
+:root .lb-empty p {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.7;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--dim);
+  max-width: 34rem;
+}
+
+:root .lb-empty-note {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--dim);
+  padding: 1rem 1.25rem;
+}
+
+/* ---- Narrow screens: drop the least-essential meta ---- */
+@media (max-width: 640px) {
+  :root .lb-time {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  :root .lb-badges {
+    display: none;
+  }
+}

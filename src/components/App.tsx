@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import type { ProfileAnalysis, RoastResult } from '../types.js';
 import { getScoreRank } from '../lib/score.js';
 import { calculateFunStats } from '../lib/funStats.js';
@@ -16,21 +16,11 @@ import CompareMode from './CompareMode.js';
 import LeaderboardView from './LeaderboardView.js';
 import RecentActivity from './RecentActivity.js';
 import RoastOfDay from './RoastOfDay.js';
-import ThemePicker, { type ThemeName } from './ThemePicker.js';
 import { saveLocalLeaderboardEntry } from '../lib/localLeaderboard.js';
 import { apiJson, apiErrorMessage, ApiError } from '../lib/api.js';
 import './App.css';
 
 type View = 'single' | 'compare' | 'leaderboard';
-
-const VALID_THEMES: ThemeName[] = ['light', 'dark', 'synthwave', 'terminal-green', 'paper'];
-
-function getInitialTheme(): ThemeName {
-  if (typeof window === 'undefined') return 'light';
-  const stored = localStorage.getItem('gitscore:theme');
-  if (stored && (VALID_THEMES as string[]).includes(stored)) return stored as ThemeName;
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-}
 
 export default function App() {
   const [view, setView] = useState<View>('single');
@@ -40,17 +30,7 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [showRoast, setShowRoast] = useState(false);
   const [generatedAtMs, setGeneratedAtMs] = useState<number | null>(null);
-  const [theme, setTheme] = useState<ThemeName>(getInitialTheme);
   const [scoreHistory, setScoreHistory] = useState<number[] | null>(null);
-
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-  }, [theme]);
-
-  const handleThemeChange = useCallback((next: ThemeName) => {
-    setTheme(next);
-    try { localStorage.setItem('gitscore:theme', next); } catch { /* private mode */ }
-  }, []);
 
   const handleSearch = useCallback(async (username: string) => {
     setLoading(true);
@@ -121,8 +101,9 @@ export default function App() {
   return (
     <div className="app">
       <header className="app-header">
+        <span className="app-subtitle">SYS.STATUS: ONLINE</span>
         <h1 className="app-title">
-          <span className="logo-icon">G</span> GitScore
+          <span className="logo-icon">G</span> GITSCORE
         </h1>
         <p className="app-subtitle">Analyze any GitHub profile. Get a score, badges, and a roast.</p>
 
@@ -147,7 +128,6 @@ export default function App() {
               Leaderboard
             </button>
           </div>
-          <ThemePicker theme={theme} onThemeChange={handleThemeChange} />
         </div>
       </header>
 
@@ -203,7 +183,7 @@ export default function App() {
               <RecentActivity username={analysis.user.login} />
 
               <button className="roast-btn" onClick={handleRoast}>
-                {showRoast ? 'Hide Roast' : '🔥 Roast Me'}
+                {showRoast ? 'HIDE ROAST' : 'ROAST'}
               </button>
 
               {showRoast && roast && <RoastPanel roast={roast} />}

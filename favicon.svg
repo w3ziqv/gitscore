@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" shape-rendering="crispEdges">
-  <rect width="16" height="16" fill="#fbfbf8"/>
-  <!-- Blocky pixel "G" in Mistral orange -->
-  <g fill="#ff5229">
+  <rect width="16" height="16" fill="#000000"/>
+  <!-- Blocky pixel "G" -->
+  <g fill="#f0f0fa">
     <rect x="2" y="2" width="9" height="2"/>
     <rect x="2" y="4" width="2" height="8"/>
     <rect x="9" y="4" width="2" height="2"/>
@@ -10,5 +10,5 @@
     <rect x="9" y="8" width="2" height="2"/>
     <rect x="2" y="12" width="9" height="2"/>
   </g>
-  <rect width="16" height="16" fill="none" stroke="#151524" stroke-width="1"/>
+  <rect width="16" height="16" fill="none" stroke="#f0f0fa" stroke-width="1"/>
 </svg>

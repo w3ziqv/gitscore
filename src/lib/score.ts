@@ -35,16 +35,29 @@ export function extractLanguages(repos: GitHubRepo[]): LanguageStat[] {
 
 export function calculateScore(user: GitHubUser, repos: GitHubRepo[], languages: LanguageStat[]): ScoreBreakdown {
   const totalStars = calculateTotalStars(repos);
-  const recentRepos = repos.filter(r => {
-    const updated = new Date(r.updated_at);
-    const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000);
-    return updated > ninetyDaysAgo;
-  });
 
-  const reposScore = Math.min(user.public_repos * 5, 200);
-  const starsScore = Math.min(totalStars * 3, 300);
-  const followersScore = Math.min(user.followers * 4, 200);
-  const activityScore = Math.min(recentRepos.length * 15, 150);
+  // Repo count saturates with sqrt: 40 repos = cap, empty repos don't scale linearly.
+  const reposScore = Math.min(Math.round(31.62 * Math.sqrt(user.public_repos)), 200);
+
+  // Stars saturate logarithmically: 10 -> 115, 100 -> 222, ~500 = cap.
+  // 100k stars vs 10k must not be a 10x score difference.
+  const starsScore = Math.min(Math.round(48 * Math.log(1 + totalStars)), 300);
+
+  // Followers saturate logarithmically: 10 -> 69, 100 -> 134, ~1000 = cap.
+  const followersScore = Math.min(Math.round(29 * Math.log(1 + user.followers)), 200);
+
+  // Freshness tiers: a repo touched this week counts 4x one last touched 3 months ago.
+  const now = Date.now();
+  const DAY = 24 * 60 * 60 * 1000;
+  let activityScore = 0;
+  for (const repo of repos) {
+    const ageDays = (now - new Date(repo.updated_at).getTime()) / DAY;
+    if (ageDays <= 7) activityScore += 20;
+    else if (ageDays <= 30) activityScore += 10;
+    else if (ageDays <= 90) activityScore += 5;
+  }
+  activityScore = Math.min(activityScore, 150);
+
   const diversityScore = Math.min(languages.length * 20, 150);
 
   const total = reposScore + starsScore + followersScore + activityScore + diversityScore;
@@ -82,63 +95,63 @@ export function calculateBadges(user: GitHubUser, repos: GitHubRepo[], score: Sc
     {
       id: 'newcomer',
       name: 'Newcomer',
-      emoji: '🌱',
+      glyph: '○',
       description: 'Account created within the last year',
       earned: accountAgeDays < 365,
     },
     {
       id: 'veteran',
       name: 'Veteran',
-      emoji: '🏆',
+      glyph: '◇',
       description: 'Account older than 3 years',
       earned: accountAgeDays > 365 * 3,
     },
     {
       id: 'polyglot',
       name: 'Polyglot',
-      emoji: '🌐',
+      glyph: '◈',
       description: '5 or more distinct languages',
       earned: languages.length >= 5,
     },
     {
       id: 'rising-star',
       name: 'Rising Star',
-      emoji: '⭐',
+      glyph: '☆',
       description: '10 or more total stars',
       earned: totalStars >= 10,
     },
     {
       id: 'social-butterfly',
       name: 'Social Butterfly',
-      emoji: '🦋',
+      glyph: '◐',
       description: '50 or more followers',
       earned: user.followers >= 50,
     },
     {
       id: 'consistent',
       name: 'Consistent',
-      emoji: '🔥',
+      glyph: '▸',
       description: 'Pushed code in the last 7 days',
       earned: hasRecentActivity,
     },
     {
       id: 'open-sourcerer',
       name: 'Open Sourcerer',
-      emoji: '🧙',
+      glyph: '◉',
       description: '20 or more public repos',
       earned: user.public_repos >= 20,
     },
     {
       id: 'zero-to-hero',
       name: 'Zero to Hero',
-      emoji: '💎',
+      glyph: '◆',
       description: 'Score above 500',
       earned: score.total >= 500,
     },
     {
       id: 'needs-push',
       name: 'Need a Push',
-      emoji: '🫠',
+      glyph: '×',
       description: 'Score below 100',
       earned: score.total < 100,
     },

@@ -1,0 +1,99 @@
+/* LanguageChart — x.ai-dark stacked bar + mono legend.
+   Scoped under .language-chart so these override the legacy pixel styles
+   in App.css regardless of stylesheet order. */
+
+body .language-chart {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: none;
+  padding: 1.5rem 1.75rem;
+}
+
+/* Eyebrow heading: mono uppercase "LANGUAGES //" */
+.language-chart .lang-eyebrow {
+  margin: 0 0 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.language-chart .lang-eyebrow span {
+  color: var(--dim);
+}
+
+/* Thin single track with hairline border */
+.language-chart .lang-bar-container {
+  display: flex;
+  height: 4px;
+  margin-bottom: 1.5rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.language-chart .lang-bar-container::after {
+  content: none;
+}
+
+.language-chart .lang-bar-segment {
+  height: 100%;
+  transition: none;
+}
+
+/* Legend: stacked rows — swatch / mono name / dim mono pct right-aligned */
+.language-chart .lang-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.language-chart .lang-item {
+  display: flex;
+  align-items: baseline;
+  gap: 0.625rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.language-chart .lang-dot {
+  flex: 0 0 auto;
+  align-self: center;
+  width: 3px;
+  height: 3px;
+  border: none;
+}
+
+.language-chart .lang-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text);
+  letter-spacing: 0.03em;
+}
+
+.language-chart .lang-pct {
+  flex: 0 0 auto;
+  color: var(--dim);
+  text-align: right;
+}
+
+.language-chart .no-data {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--dim);
+}
+
+@media (max-width: 640px) {
+  body .language-chart {
+    padding: 1.25rem;
+  }
+}
