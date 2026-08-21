@@ -206,18 +206,18 @@ export default function App() {
       <a className="skip-link" href="#main">SKIP TO CONTENT</a>
 
       <header className="app-header">
-        <div className="masthead-grid">
-          <div className="masthead-left">
-            <div className="masthead-wordmark">
-              <span className="masthead-glyph" aria-hidden="true">◆</span>
-              <h1 className="app-title">GITSCORE</h1>
+          <div className="masthead-grid">
+            <div className="masthead-left">
+              <div className="masthead-wordmark">
+                <span className="masthead-glyph hero-glyph" aria-hidden="true">◆</span>
+                <h1 className="app-title hero-title">GITSCORE</h1>
+              </div>
+              <p className="masthead-sub">GITHUB PROFILE ANALYSIS SYSTEM</p>
+              <p className="app-subtitle masthead-tagline">
+                Analyze any GitHub profile. Get a score, badges,
+                and a roast.
+              </p>
             </div>
-            <p className="masthead-sub">GitHub Profile Analysis System</p>
-            <p className="app-subtitle masthead-tagline">
-              Analyze any GitHub profile. Get a score, badges, and a roast.
-            </p>
-          </div>
-
           <div className="masthead-right">
             <p className="masthead-status">
               <span className="masthead-dot" aria-hidden="true" />
@@ -316,11 +316,19 @@ export default function App() {
                 generatedAtMs={generatedAtMs ?? undefined}
                 historyPoints={scoreHistory ?? undefined}
               />
-              <Badges badges={analysis.badges} />
+
+              <div className="pair-row">
+                <Badges badges={analysis.badges} />
+                <FunStats stats={funStats} />
+              </div>
+
               <AchievementProgress badges={analysis.badges} user={analysis.user} repos={analysis.repos} />
-              <Recommendations user={analysis.user} repos={analysis.repos} score={analysis.score} />
-              <FunStats stats={funStats} />
-              <LanguageChart languages={analysis.languages} />
+
+              <div className="pair-row">
+                <Recommendations user={analysis.user} repos={analysis.repos} score={analysis.score} />
+                <LanguageChart languages={analysis.languages} />
+              </div>
+
               <ShareCard analysis={analysis} />
 
               <div className="top-repos">
