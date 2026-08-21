@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, lazy, Suspense } from 'react';
+import { useState, useCallback, useMemo, useEffect, lazy, Suspense } from 'react';
 import ErrorBoundary from './ErrorBoundary.js';
 import type { ProfileAnalysis, RoastResult } from '../types.js';
 import { getScoreRank } from '../lib/score.js';
@@ -21,6 +21,7 @@ import './App.css';
 
 const CompareMode = lazy(() => import('./CompareMode.js'));
 const LeaderboardView = lazy(() => import('./LeaderboardView.js'));
+const WrappedStory = lazy(() => import('./WrappedStory.js'));
 
 const LAST_USER_KEY = 'gitscore:lastUser';
 
@@ -63,6 +64,12 @@ export default function App() {
   const [lastSavedUser, setLastSavedUser] = useState<string | null>(() =>
     readLastUser()
   );
+  const [wrappedUser, setWrappedUser] = useState<string | null>(null);
+
+  useEffect(() => {
+    const wu = new URLSearchParams(window.location.search).get('wrapped');
+    if (wu && /^[a-z0-9_-]{1,39}$/i.test(wu)) setWrappedUser(wu);
+  }, []);
 
   const handleSearch = useCallback(async (username: string) => {
     setLastUsername(username);
@@ -190,6 +197,9 @@ export default function App() {
                 Leaderboard
               </button>
             </div>
+            <button className="wrapped-btn" onClick={() => setWrappedUser(analysis?.user.login ?? '')}>
+              WRAPPED //
+            </button>
           </div>
         </div>
       </header>
@@ -337,6 +347,17 @@ export default function App() {
         <ErrorBoundary key={view}>
           <Suspense fallback={<div className="loading">LOADING VIEW</div>}>
             <LeaderboardView onSearch={handleSearch} />
+          </Suspense>
+        </ErrorBoundary>
+      )}
+
+      {wrappedUser !== null && (
+        <ErrorBoundary>
+          <Suspense fallback={<div className="loading">LOADING WRAPPED</div>}>
+            <WrappedStory
+              initialUsername={wrappedUser || null}
+              onClose={() => setWrappedUser(null)}
+            />
           </Suspense>
         </ErrorBoundary>
       )}

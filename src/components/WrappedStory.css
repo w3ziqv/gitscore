@@ -1,0 +1,385 @@
+/* WrappedStory.css — full-screen story viewer. Tokens only (DESIGN.md §1),
+   zero radius, hairline borders, mono micro-labels. */
+
+.ws-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  outline: none;
+}
+
+.ws-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.ws-close:hover {
+  border-color: var(--border-strong);
+  color: var(--text);
+  background: var(--ghost);
+}
+
+/* ── Segmented progress ─────────────────────────────────────────────── */
+
+.ws-progress {
+  position: absolute;
+  top: 0.75rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 0.375rem;
+  width: min(28rem, calc(100vw - 6rem));
+}
+
+.ws-seg {
+  flex: 1;
+  height: 2px;
+  background: var(--ghost);
+  overflow: hidden;
+}
+
+.ws-seg-fill {
+  width: 0;
+  height: 100%;
+  background: var(--text);
+}
+
+.ws-seg.done .ws-seg-fill {
+  width: 100%;
+}
+
+.ws-seg.active .ws-seg-fill {
+  animation: ws-fill linear forwards;
+  animation-duration: 4.5s;
+  animation-play-state: running;
+}
+
+.ws-paused .ws-seg.active .ws-seg-fill {
+  animation-play-state: paused;
+}
+
+@keyframes ws-fill {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ws-seg.active .ws-seg-fill {
+    animation: none;
+    width: 0;
+  }
+}
+
+/* ── Slide frame ────────────────────────────────────────────────────── */
+
+.ws-slide {
+  width: min(46rem, calc(100vw - 3rem));
+  min-height: 16rem;
+  padding: 2rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+.ws-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 1.25rem;
+  min-height: 14rem;
+}
+
+.ws-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin: 0;
+}
+
+.ws-headline,
+.ws-login {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 6vw, 3.25rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  color: var(--text);
+  margin: 0;
+}
+
+.ws-sub {
+  font-family: var(--font-sans);
+  color: var(--muted);
+  margin: 0;
+}
+
+.ws-caption {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.18em;
+  color: var(--dim);
+  margin: 0;
+}
+
+.ws-big-num {
+  font-family: var(--font-mono);
+  font-size: clamp(3.5rem, 12vw, 7rem);
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1;
+}
+
+/* ── Identity / stats ───────────────────────────────────────────────── */
+
+.ws-tagline {
+  font-family: var(--font-display);
+  font-size: clamp(2.25rem, 8vw, 4rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--signal);
+}
+
+.ws-stat-row {
+  display: flex;
+  gap: 0.75rem;
+  width: 100%;
+  justify-content: center;
+}
+
+.ws-cell {
+  flex: 1;
+  max-width: 14rem;
+  padding: 1rem 1.25rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.ws-cell-value {
+  font-family: var(--font-mono);
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.ws-cell-label {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.18em;
+  color: var(--dim);
+}
+
+/* ── Languages ──────────────────────────────────────────────────────── */
+
+.ws-lang-bar {
+  display: flex;
+  width: 100%;
+  max-width: 30rem;
+  height: 1.25rem;
+  border: 1px solid var(--border);
+}
+
+.ws-lang-seg {
+  background: var(--muted);
+  border-right: 1px solid var(--bg);
+}
+
+.ws-lang-seg:last-child {
+  border-right: none;
+}
+
+.ws-lang-seg.strong {
+  background: var(--text);
+}
+
+.ws-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+  justify-content: center;
+}
+
+.ws-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.14em;
+  color: var(--dim);
+}
+
+.ws-legend-chip {
+  width: 0.75rem;
+  height: 0.5rem;
+  background: var(--muted);
+}
+
+.ws-legend-chip.strong {
+  background: var(--text);
+}
+
+/* ── Rank reveal ────────────────────────────────────────────────────── */
+
+.ws-rank-letter {
+  font-family: var(--font-display);
+  font-size: clamp(5rem, 18vw, 9rem);
+  font-weight: 600;
+  line-height: 1;
+}
+
+/* ── Verdict + actions ──────────────────────────────────────────────── */
+
+.ws-verdict {
+  font-family: var(--font-sans);
+  font-style: italic;
+  font-size: 1.125rem;
+  color: var(--text);
+  max-width: 34rem;
+  margin: 0;
+}
+
+.ws-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.ws-btn {
+  padding: 0.75rem 1.5rem;
+  background: var(--ghost);
+  border: 1px solid var(--border-strong);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  letter-spacing: 0.14em;
+  cursor: pointer;
+}
+
+.ws-btn:hover {
+  border-color: var(--text);
+}
+
+.ws-btn.ghost {
+  background: transparent;
+  border-color: var(--border);
+  color: var(--muted);
+}
+
+.ws-btn.ghost.copied {
+  color: var(--signal);
+  border-color: var(--signal);
+}
+
+/* ── Intro form / loading / error ───────────────────────────────────── */
+
+.ws-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  text-align: center;
+}
+
+.ws-input {
+  width: min(22rem, 100%);
+  padding: 0.75rem 1rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 1rem;
+}
+
+.ws-input:focus-visible {
+  outline: 1px solid var(--border-strong);
+  outline-offset: 2px;
+}
+
+.ws-error {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  color: var(--error);
+  margin: 0;
+}
+
+.ws-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.ws-skeleton-line {
+  width: min(24rem, 80%);
+  height: 1px;
+  background: var(--ghost);
+}
+
+.ws-skeleton-block {
+  width: min(12rem, 60%);
+  height: 5rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+
+.ws-status {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.18em;
+  color: var(--dim);
+  margin: 0;
+}
+
+/* ── Click zones ────────────────────────────────────────────────────── */
+
+.ws-zone {
+  position: absolute;
+  top: 3.5rem;
+  bottom: 0;
+  width: 50%;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.ws-zone.left { left: 0; }
+.ws-zone.right { right: 0; }
+
+/* ── Responsive ─────────────────────────────────────────────────────── */
+
+@media (max-width: 640px) {
+  .ws-slide {
+    padding: 1.25rem;
+  }
+
+  .ws-stat-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ws-cell {
+    max-width: none;
+  }
+}

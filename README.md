@@ -16,6 +16,10 @@ Live: [gitscore.mateusz-szostak1.workers.dev](https://gitscore.mateusz-szostak1.
 - **Recent activity** — last ~30 GitHub events.
 - **Roast mode** — auto-generated critique of a profile, in EN/PL/ES/DE/FR. "Roast of the day" on the homepage.
 - **Head-to-head** — two users side by side, winner highlighted.
+- **Wrapped** — full-screen story of your last 365 days on GitHub: commits shipped,
+  PRs vs reviews identity, stars, language DNA and a rank reveal, ending in a
+  downloadable share card. Powered by the GitHub Search API, cached 30 min;
+  an optional one-line AI verdict (Cloudflare Workers AI) with a deterministic fallback.
 - **Share card** — download a PNG with score, breakdown and badges.
 - **Leaderboard** — global ranking persisted in Neon Postgres, with a localStorage fallback. Two extra tabs: *Most improved* (score delta over 7/30 days) and *Squad* (your pinned friends).
 - **Embeddable badge** — `![GitScore](https://gitscore.mateusz-szostak1.workers.dev/api/badge/w3ziqv)` for READMEs.
@@ -38,8 +42,9 @@ Stars and followers are logarithmic on purpose: 100k stars should not be worth
 - Frontend: React 19 + TypeScript + Vite
 - Backend: Cloudflare Workers (Hono) — one worker serves both the API and the static assets
 - Database: Neon Postgres (leaderboard, score history) with localStorage fallback
-- Data: GitHub REST API
-- Tests: Vitest — 80 unit tests (score, roast, localization, badge SVG, squad, score history, webhooks)
+- Data: GitHub REST API (+ Search API for Wrapped)
+- AI (optional): Cloudflare Workers AI binding (`AI`) for the one-line Wrapped verdict; absent or failing => deterministic fallback
+- Tests: Vitest — 100 unit tests (score, roast, localization, badge SVG, squad, score history, webhooks, wrapped report + card)
 
 ## Run locally
 
@@ -89,7 +94,18 @@ Set these on the worker (dashboard → gitscore → Settings → Variables, or
 | GET | `/api/score-history/:username?days=14` | Score timeline for the sparkline |
 | GET | `/api/roast-of-the-day` | Today's roast from recently analyzed profiles |
 | GET | `/api/leaderboard?tab=global\|improved&window=7\|30` | Global ranking or score-delta ranking |
+| GET | `/api/wrapped/:username` | Rolling-365-day Wrapped report (commits, PRs, reviews, stars, languages) |
+| GET | `/api/wrapped-card/:username` | 1200×630 SVG share card for the Wrapped report |
 | GET | `/api/health` | Health check |
+
+## Sharing & promotion
+
+Wrapped is built to travel: every story ends in a downloadable PNG card and a
+copyable `?wrapped=<login>` link. The SVG card endpoint embeds anywhere:
+
+```md
+![GitScore Wrapped](https://gitscore.mateusz-szostak1.workers.dev/api/wrapped-card/w3ziqv)
+```
 
 ## Badges
 

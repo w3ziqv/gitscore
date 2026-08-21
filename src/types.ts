@@ -114,3 +114,32 @@ export interface Recommendation {
   detail: string;
   impactPoints: number;
 }
+
+// GitScore Wrapped — rolling-365-day activity report for one user.
+// All counters come from GitHub Search API total_count values; when a query
+// fails the field falls back to 0 and `partial` is true (UI may soften copy).
+export interface WrappedReport {
+  login: string;
+  name: string | null;
+  avatarUrl: string;
+  windowStartIso: string;
+  generatedAtMs: number;
+  commits: number;
+  prsOpened: number;
+  prsMerged: number;
+  reviewsGiven: number;
+  issuesOpened: number;
+  reposCreated: number;
+  starsNowTotal: number;
+  topRepos: WrappedTopRepo[];
+  topLanguages: string[];
+  score: number;
+  rank: ScoreRank;
+  aiVerdict: string | null;
+  partial: boolean;
+}
+
+export interface WrappedTopRepo {
+  name: string;
+  stars: number;
+}

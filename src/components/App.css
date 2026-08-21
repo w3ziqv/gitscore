@@ -177,6 +177,30 @@
   box-shadow: inset 0 0 0 1px var(--border-strong);
 }
 
+/* ---- Wrapped CTA ---- */
+.wrapped-btn {
+  margin-left: 0.75rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 0.5625rem 1rem;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  transition:
+    color var(--dur) var(--ease),
+    background var(--dur) var(--ease),
+    border-color var(--dur) var(--ease);
+}
+
+.wrapped-btn:hover {
+  color: var(--text);
+  background: var(--ghost);
+  border-color: var(--border-strong);
+}
+
 /* ---- Main ---- */
 .main-content {
   flex: 1;

@@ -16,6 +16,8 @@ import {
   buildThresholdPayload,
   fireWebhook,
 } from './lib/webhook.js';
+import { buildWrappedReport } from './lib/wrapped.js';
+import { generateWrappedCardSvg } from './lib/wrappedCard.js';
 import type { RoastResult } from './types.js';
 
 interface WorkerFetcher {
@@ -39,6 +41,15 @@ type Env = {
   DATABASE_URL?: string;
   WEBHOOK_SUB_TOKEN?: string;
   SITE_URL?: string;
+  AI?: {
+    run(
+      model: string,
+      input: {
+        messages: Array<{ role: string; content: string }>;
+        max_tokens?: number;
+      },
+    ): Promise<{ response?: string }> | Promise<string>;
+  };
 };
 
 const app = new Hono<{ Bindings: Env }>();
@@ -485,6 +496,54 @@ app.get('/api/score-history/:username', async (c) => {
   } catch (err) {
     console.error('score-history error:', err);
     return c.json({ history: [] });
+  }
+});
+
+// ── GET /api/wrapped/:username ──────────────────────────────────────────────
+
+app.get('/api/wrapped/:username', async (c) => {
+  const username = c.req.param('username');
+  if (!username) {
+    return c.json({ error: 'Username required' }, 400);
+  }
+  if (!/^[a-z0-9_-]{1,39}$/i.test(username)) {
+    return c.json({ error: 'Invalid username' }, 400);
+  }
+
+  try {
+    const report = await buildWrappedReport(username, {
+      GITHUB_TOKEN: c.env?.GITHUB_TOKEN ?? process.env.GITHUB_TOKEN,
+      AI: c.env?.AI,
+    });
+    c.header('Cache-Control', 'public, max-age=1800');
+    return c.json({ report });
+  } catch (error) {
+    return jsonError(c, error);
+  }
+});
+
+// ── GET /api/wrapped-card/:username ─────────────────────────────────────────
+
+app.get('/api/wrapped-card/:username', async (c) => {
+  const username = c.req.param('username');
+  if (!username) {
+    return c.json({ error: 'Username required' }, 400);
+  }
+  if (!/^[a-z0-9_-]{1,39}$/i.test(username)) {
+    return c.json({ error: 'Invalid username' }, 400);
+  }
+
+  try {
+    const report = await buildWrappedReport(username, {
+      GITHUB_TOKEN: c.env?.GITHUB_TOKEN ?? process.env.GITHUB_TOKEN,
+      AI: c.env?.AI,
+    });
+    const svg = generateWrappedCardSvg(report);
+    c.header('Content-Type', 'image/svg+xml');
+    c.header('Cache-Control', 'public, max-age=1800');
+    return c.body(svg, 200);
+  } catch (error) {
+    return jsonError(c, error);
   }
 });
 
