@@ -50,7 +50,7 @@ Ranks: F <100, D 100+, C 200+, B 350+, A 500+, S 650+, S+ 800+.
 - Database: Neon Postgres (leaderboard, score history) with localStorage fallback
 - Data: GitHub REST API (+ Search API for Wrapped)
 - AI (optional): Cloudflare Workers AI binding (`AI`) for the one-line Wrapped verdict; absent or failing => deterministic fallback
-- Tests: Vitest — 100 unit tests (score, roast, localization, badge SVG, squad, score history, webhooks, wrapped report + card)
+- Tests: Vitest — 116 unit tests (score, roast, localization, badge SVG, squad, score history, webhooks, wrapped report + card, social previews)
 
 ## Run locally
 
@@ -112,6 +112,11 @@ copyable `?wrapped=<login>` link. The SVG card endpoint embeds anywhere:
 ```md
 ![GitScore Wrapped](https://gitscore.mateusz-szostak1.workers.dev/api/wrapped-card/w3ziqv)
 ```
+
+Profile and Wrapped links (`/?u=`, `/?wrapped=`) serve crawler-facing HTML:
+the social preview shows the real score, rank and pillar breakdown instead of
+a generic banner. The nightly cron also re-analyzes the 30 oldest leaderboard
+entries, migrating legacy-score rows to the current model over a few nights.
 
 ## Badges
 

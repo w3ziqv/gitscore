@@ -74,6 +74,34 @@ export async function saveToLeaderboard(profile: ProfileTelemetry): Promise<void
 }
 
 /**
+ * Fetch up to `limit` entries with the oldest analyzed_at_ms — the nightly
+ * backfill queue that migrates legacy-score rows to the current model.
+ */
+export async function getStaleEntries(limit: number = 30): Promise<LeaderboardEntry[]> {
+  if (!isDbConfigured()) return [];
+
+  try {
+    await ensureSchema();
+    const s = sql();
+    const rows = (await s`
+      SELECT
+        login, name, avatar_url, score, rank,
+        badges_earned AS "badgesEarned",
+        total_stars   AS "totalStars",
+        followers,
+        analyzed_at_ms AS "analyzedAtMs"
+      FROM leaderboard
+      ORDER BY analyzed_at_ms ASC
+      LIMIT ${limit}
+    `) as LeaderboardRow[];
+    return rows.map(toLeaderboardEntry);
+  } catch (err) {
+    console.error('leaderboard stale fetch failed:', err);
+    return [];
+  }
+}
+
+/**
  * Fetch up to `limit` top entries by score.
  * Returns `{ entries: [], total: 0 }` when the DB is not configured so the
  * frontend merge logic collapses to the localStorage-only path.

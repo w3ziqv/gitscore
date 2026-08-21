@@ -6,7 +6,7 @@ import { getScoreRank } from './lib/score.js';
 import { generateBadgeSvg } from './lib/badge.js';
 import { generateRoastWithLang, parseAcceptLanguage } from './lib/roast.js';
 import { parseGitHubEvents } from './lib/activity.js';
-import { getLeaderboard, getImprovedLeaderboard, saveToLeaderboard } from './lib/leaderboard.js';
+import { getLeaderboard, getImprovedLeaderboard, saveToLeaderboard, getStaleEntries } from './lib/leaderboard.js';
 import { upsertSnapshot, getLastNDays } from './lib/scoreHistory.js';
 import { ensureSchema, sql, isDbConfigured } from './lib/db.js';
 import {
@@ -611,7 +611,97 @@ app.post('/api/webhook/threshold', async (c) => {
 
 app.all('/api/*', (c) => c.json({ error: 'Not found' }, 404));
 
+// ── Dynamic social previews: crawler-facing meta for ?u= / ?wrapped= ────────
+// Social crawlers do not run JS, so the SPA shell alone would render a generic
+// preview. When a shareable link is opened we serve the same shell with
+// profile-specific <title>/og/twitter tags. Cache API keeps it cheap.
+
+const USERNAME_META_RE = /^[a-z0-9_-]{1,39}$/i;
+const META_CACHE_TTL_SECONDS = 1800;
+
+function escapeMeta(value: string): string {
+  return value.replace(/[&<>"']/g, (ch) => (
+    { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch] as string
+  ));
+}
+
+async function serveSocialPreview(
+  c: { env: { ASSETS?: WorkerFetcher }; req: { url: string } },
+  login: string,
+  wrappedMode: boolean,
+): Promise<Response | null> {
+  const assets = c.env.ASSETS;
+  if (!assets) return null;
+
+  const origin = new URL(c.req.url).origin;
+  const cacheKey = `${origin}/__social/${login.toLowerCase()}`;
+  const cachesRef = (globalThis as { caches?: { default?: Cache } }).caches?.default;
+  try {
+    if (cachesRef) {
+      const hit = await cachesRef.match(cacheKey);
+      if (hit) return hit;
+    }
+  } catch {
+    // cache unavailable — proceed uncached
+  }
+
+  let analysis;
+  try {
+    analysis = await fetchProfile(login);
+  } catch {
+    return null;
+  }
+
+  const shellRes = await assets.fetch(new Request(`${origin}/`));
+  const html = await shellRes.text();
+
+  const rank = getScoreRank(analysis.score.total);
+  const displayName = analysis.user.name || analysis.user.login;
+  const title = wrappedMode
+    ? `${displayName}'s year in code — GitScore Wrapped`
+    : `${displayName} (@${analysis.user.login}) — ${analysis.score.total}/1000 · Rank ${rank.rank}`;
+  const description = `Impact ${analysis.score.stars} · Consistency ${analysis.score.activity} · Portfolio ${analysis.score.repos} · Community ${analysis.score.followers} · Range ${analysis.score.diversity}. Analyze any GitHub profile on GitScore.`;
+  const pageUrl = `${origin}/?u=${encodeURIComponent(analysis.user.login)}`;
+
+  const t = escapeMeta(title);
+  const d = escapeMeta(description);
+  const u2 = escapeMeta(pageUrl);
+
+  const out = html
+    .replace(/<title>[\s\S]*?<\/title>/, `<title>${t}</title>`)
+    .replace(/(<meta\s+(?:property|name)="og:title"\s+content=")[^"]*(")/, `$1${t}$2`)
+    .replace(/(<meta\s+(?:property|name)="twitter:title"\s+content=")[^"]*(")/, `$1${t}$2`)
+    .replace(/(<meta\s+(?:property|name)="og:description"\s+content=")[^"]*(")/, `$1${d}$2`)
+    .replace(/(<meta\s+(?:property|name)="twitter:description"\s+content=")[^"]*(")/, `$1${d}$2`)
+    .replace(/(<meta\s+(?:property|name)="og:url"\s+content=")[^"]*(")/, `$1${u2}$2`);
+
+  const res = new Response(out, {
+    headers: {
+      'Content-Type': 'text/html; charset=utf-8',
+      'Cache-Control': `public, max-age=${META_CACHE_TTL_SECONDS}`,
+    },
+  });
+  try {
+    if (cachesRef) await cachesRef.put(cacheKey, res.clone());
+  } catch {
+    // best-effort caching only
+  }
+  return res;
+}
+
 app.all('*', async (c) => {
+  const url = new URL(c.req.raw.url);
+  if (c.req.method === 'GET' && url.pathname === '/') {
+    const uParam = url.searchParams.get('u');
+    const wParam = url.searchParams.get('wrapped');
+    const uValid = Boolean(uParam && USERNAME_META_RE.test(uParam));
+    const wValid = Boolean(wParam && USERNAME_META_RE.test(wParam));
+    if (uValid || wValid) {
+      const login = (uParam && uValid ? uParam : wParam) as string;
+      const preview = await serveSocialPreview(c, login, wValid && !uValid);
+      if (preview) return preview;
+    }
+  }
   const assets = c.env.ASSETS;
   if (assets) {
     return assets.fetch(c.req.raw);
@@ -627,10 +717,9 @@ async function runScheduledRefresh(): Promise<void> {
     return;
   }
 
-  const { entries } = await getLeaderboard(20);
-  for (const entry of entries) {
+  const refreshLogin = async (login: string): Promise<void> => {
     try {
-      const analysis = await fetchProfile(entry.login);
+      const analysis = await fetchProfile(login);
       const rank = getScoreRank(analysis.score.total);
       const badgesEarned = analysis.badges.filter((b) => b.earned).length;
       await saveToLeaderboard({
@@ -644,8 +733,20 @@ async function runScheduledRefresh(): Promise<void> {
         followers: analysis.user.followers,
       });
     } catch (err) {
-      console.error(`scheduled refresh failed for ${entry.login}:`, err);
+      console.error(`scheduled refresh failed for ${login}:`, err);
     }
+  };
+
+  const { entries } = await getLeaderboard(20);
+  for (const entry of entries) {
+    await refreshLogin(entry.login);
+  }
+
+  // Backfill queue: re-analyze the oldest entries so rows scored by legacy
+  // models migrate to the current one over successive nights.
+  const stale = await getStaleEntries(30);
+  for (const entry of stale) {
+    await refreshLogin(entry.login);
   }
 }
 
