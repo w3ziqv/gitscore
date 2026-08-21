@@ -38,6 +38,7 @@ export default function ShareCard({ analysis }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const linkRef = useRef<HTMLAnchorElement>(null);
   const [copied, setCopied] = useState(false);
+  const [linkCopied, setLinkCopied] = useState(false);
 
   const drawCard = useCallback(() => {
     const canvas = canvasRef.current;
@@ -175,12 +176,27 @@ export default function ShareCard({ analysis }: Props) {
     }
   }, [analysis.user.login]);
 
+  const handleProfileLinkCopy = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(
+        `${window.location.origin}/?u=${encodeURIComponent(analysis.user.login)}`,
+      );
+      setLinkCopied(true);
+      window.setTimeout(() => setLinkCopied(false), 1800);
+    } catch {
+      setLinkCopied(false);
+    }
+  }, [analysis.user.login]);
+
   return (
     <div className="share-card-section">
       <div className="share-card-group">
         <span className="share-card-label">SHARE //</span>
         <button className="share-btn" onClick={handleDownload}>
           Download PNG
+        </button>
+        <button className="embed-btn" onClick={() => void handleProfileLinkCopy()}>
+          {linkCopied ? 'Link copied!' : 'Copy profile link'}
         </button>
       </div>
       <div className="share-card-group">

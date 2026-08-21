@@ -6,10 +6,11 @@ const USERNAME_ERROR = 'USERNAME: 1-39 CHARS, A-Z 0-9 _ -';
 interface Props {
   onSearch: (username: string) => void;
   loading: boolean;
+  initialValue?: string | null;
 }
 
-export default function SearchBar({ onSearch, loading }: Props) {
-  const [value, setValue] = useState('');
+export default function SearchBar({ onSearch, loading, initialValue }: Props) {
+  const [value, setValue] = useState(initialValue ?? '');
 
   const trimmed = value.trim();
   const invalid = trimmed.length > 0 && !USERNAME_RE.test(trimmed);

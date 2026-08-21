@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useEffect, lazy, Suspense } from 'react';
+import { useState, useCallback, useMemo, useEffect, useRef, lazy, Suspense } from 'react';
 import ErrorBoundary from './ErrorBoundary.js';
 import type { ProfileAnalysis, RoastResult } from '../types.js';
 import { getScoreRank } from '../lib/score.js';
@@ -24,6 +24,7 @@ const LeaderboardView = lazy(() => import('./LeaderboardView.js'));
 const WrappedStory = lazy(() => import('./WrappedStory.js'));
 
 const LAST_USER_KEY = 'gitscore:lastUser';
+const USERNAME_URL_RE = /^[a-z0-9_-]{1,39}$/i;
 
 type View = 'single' | 'compare' | 'leaderboard';
 
@@ -65,10 +66,14 @@ export default function App() {
     readLastUser()
   );
   const [wrappedUser, setWrappedUser] = useState<string | null>(null);
+  const lastFetchedRef = useRef<string | null>(null);
 
   useEffect(() => {
-    const wu = new URLSearchParams(window.location.search).get('wrapped');
-    if (wu && /^[a-z0-9_-]{1,39}$/i.test(wu)) setWrappedUser(wu);
+    const params = new URLSearchParams(window.location.search);
+    const w = params.get('wrapped');
+    if (w && USERNAME_URL_RE.test(w)) setWrappedUser(w);
+    const u = params.get('u');
+    if (u && USERNAME_URL_RE.test(u)) void handleSearch(u);
   }, []);
 
   const handleSearch = useCallback(async (username: string) => {
@@ -99,6 +104,14 @@ export default function App() {
       saveLocalLeaderboardEntry(data);
       saveLastUser(data.user.login);
       setLastSavedUser(data.user.login);
+      lastFetchedRef.current = data.user.login;
+
+      const currentU = new URLSearchParams(window.location.search).get('u');
+      if (currentU && currentU.toLowerCase() === data.user.login.toLowerCase()) {
+        window.history.replaceState(null, '', `/?u=${encodeURIComponent(data.user.login)}`);
+      } else {
+        window.history.pushState(null, '', `/?u=${encodeURIComponent(data.user.login)}`);
+      }
 
       // Best-effort sparkline fetch — backend no-ops gracefully if DB absent.
       try {
@@ -143,8 +156,46 @@ export default function App() {
     }
   }, [analysis, roast]);
 
-  const rank = analysis ? getScoreRank(analysis.score.total) : null;
-  const funStats = useMemo(
+  useEffect(() => {
+    const onPopState = () => {
+      const params = new URLSearchParams(window.location.search);
+      const w = params.get('wrapped');
+      setWrappedUser(w && USERNAME_URL_RE.test(w) ? w : null);
+      const u = params.get('u');
+      if (u && USERNAME_URL_RE.test(u)) {
+        if (u.toLowerCase() !== (lastFetchedRef.current ?? '').toLowerCase()) void handleSearch(u);
+      } else if (!u) {
+        setAnalysis(null);
+        setRoast(null);
+        setShowRoast(false);
+        setError(null);
+        setScoreHistory(null);
+        setGeneratedAtMs(null);
+        lastFetchedRef.current = null;
+      }
+    };
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  }, [handleSearch]);
+
+  const openWrapped = useCallback((login: string) => {
+    setWrappedUser(login || null);
+    if (!login) return;
+    const params = new URLSearchParams(window.location.search);
+    params.set('wrapped', login);
+    window.history.pushState({ wrapped: login }, '', `?${params.toString()}`);
+  }, []);
+
+  const closeWrapped = useCallback(() => {
+    setWrappedUser(null);
+    const params = new URLSearchParams(window.location.search);
+    if (params.has('wrapped')) {
+      params.delete('wrapped');
+      window.history.pushState(null, '', `${window.location.pathname}?${params.toString()}`);
+    }
+  }, []);
+
+  const rank = analysis ? getScoreRank(analysis.score.total) : null;  const funStats = useMemo(
     () => (analysis ? calculateFunStats(analysis.user, analysis.repos, analysis.score) : []),
     [analysis]
   );
@@ -197,7 +248,7 @@ export default function App() {
                 Leaderboard
               </button>
             </div>
-            <button className="wrapped-btn" onClick={() => setWrappedUser(analysis?.user.login ?? '')}>
+            <button className="wrapped-btn" onClick={() => openWrapped(analysis?.user.login ?? '')}>
               WRAPPED //
             </button>
           </div>
@@ -208,7 +259,7 @@ export default function App() {
         <main id="main" className="main-content">
           <RoastOfDay onPick={handleSearch} />
 
-          <SearchBar onSearch={handleSearch} loading={loading} />
+          <SearchBar onSearch={handleSearch} loading={loading} initialValue={lastUsername} />
 
           <div className="status-region" aria-live="polite">
             {error && (
@@ -356,7 +407,7 @@ export default function App() {
           <Suspense fallback={<div className="loading">LOADING WRAPPED</div>}>
             <WrappedStory
               initialUsername={wrappedUser || null}
-              onClose={() => setWrappedUser(null)}
+              onClose={closeWrapped}
             />
           </Suspense>
         </ErrorBoundary>
