@@ -15,6 +15,7 @@ import ShareCard from './ShareCard.js';
 import RoastPanel from './RoastPanel.js';
 import RecentActivity from './RecentActivity.js';
 import RoastOfDay from './RoastOfDay.js';
+import ProofStrip from './ProofStrip.js';
 import { saveLocalLeaderboardEntry } from '../lib/localLeaderboard.js';
 import { apiJson, apiErrorMessage, ApiError } from '../lib/api.js';
 import './App.css';
@@ -373,6 +374,7 @@ export default function App() {
               </div>
               <p className="empty-status">Standby // awaiting input</p>
               <p>Enter a GitHub username to analyze.</p>
+              <ProofStrip />
               <div className="suggestions">
                 <span>Try:</span>
                 {['torvalds', 'gaearon', 'sindresorhus', 'w3ziqv'].map(u => (

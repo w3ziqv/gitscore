@@ -33,28 +33,8 @@ export default function RoastOfDay({ onPick }: Props) {
     };
   }, []);
 
-  if (data === undefined) {
-    return (
-      <div className="roast-of-day">
-        <div className="roast-of-day-header">
-          <span className="roast-of-day-dot" aria-hidden="true" />
-          <span className="roast-of-day-kicker">ROAST OF THE DAY //</span>
-        </div>
-        <p className="roast-of-day-loading">Loading today's roast…</p>
-      </div>
-    );
-  }
-
-  if (data === null) {
-    return (
-      <div className="roast-of-day">
-        <div className="roast-of-day-header">
-          <span className="roast-of-day-dot" aria-hidden="true" />
-          <span className="roast-of-day-kicker">ROAST OF THE DAY //</span>
-        </div>
-        <p className="roast-of-day-error">Roast feed unavailable. Check back later.</p>
-      </div>
-    );
+  if (data === undefined || data === null) {
+    return null;
   }
 
   const firstLine = data.roast.lines[0] ?? data.roast.overall;

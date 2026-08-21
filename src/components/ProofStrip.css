@@ -1,0 +1,81 @@
+/* ProofStrip.css — first-visit proof section. Tokens only (DESIGN.md). */
+
+.proof {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 2.5rem 1rem 1rem;
+  text-align: center;
+}
+
+.proof-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin: 0;
+}
+
+.proof-card-link {
+  display: block;
+  max-width: 34rem;
+  width: 100%;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  transition: border-color var(--dur) var(--ease);
+}
+
+.proof-card-link:hover {
+  border-color: var(--border-strong);
+}
+
+.proof-img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.proof-fallback {
+  aspect-ratio: 1200 / 630;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.proof-fallback-score {
+  font-family: var(--font-mono);
+  font-size: 3.5rem;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1;
+}
+
+.proof-fallback-score span {
+  font-size: 1.25rem;
+  color: var(--dim);
+}
+
+.proof-fallback-rank {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  letter-spacing: 0.18em;
+  color: var(--signal);
+}
+
+.proof-method {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--dim);
+  text-decoration: none;
+  transition: color var(--dur) var(--ease);
+}
+
+.proof-method:hover {
+  color: var(--text);
+}
