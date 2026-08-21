@@ -26,16 +26,22 @@ Live: [gitscore.mateusz-szostak1.workers.dev](https://gitscore.mateusz-szostak1.
 
 ## Score algorithm
 
-| Component | Max | How it's calculated |
-|---|---|---|
-| Repos | 200 | `min(round(31.62 * sqrt(repos)), 200)` — saturates around 40 repos |
-| Stars | 300 | `min(round(48 * ln(1 + stars)), 300)` — logarithmic; 10 stars ≈ 115 pts, ~500 fills the cap |
-| Followers | 200 | `min(round(29 * ln(1 + followers)), 200)` — logarithmic; ~1000 fills the cap |
-| Activity | 150 | freshness tiers per repo: updated <7d = 20 pts, <30d = 10, <90d = 5 |
-| Diversity | 150 | `min(languages * 20, 150)` |
+Five pillars, 0–1000 total. Forks never count anywhere. Every raw signal
+saturates, so whales can't dominate and small honest profiles still move.
 
-Stars and followers are logarithmic on purpose: 100k stars should not be worth
-10x what 10k is. Ranks: F <100, D 100+, C 200+, B 350+, A 500+, S 650+, S+ 800+.
+| Pillar | Field | Max | How it's calculated |
+|---|---|---|---|
+| Impact | `stars` | 300 | Original stars: `300·ln(1+s)/ln(751)` — 10★ ≈ 109 pts, ~750 fills the cap |
+| Consistency | `activity` | 250 | Recency per original repo (<7d=25, <14d=18, <30d=12, <90d=7, <180d=4, <365d=2, cap 175) **plus** monthly cadence: distinct active months in the last year ×6.25 (cap 75) |
+| Portfolio | `repos` | 180 | Non-fork repos: sqrt base `160·√n/√40` + up to 20 pts craft bonus for described repos |
+| Community | `followers` | 170 | `170·ln(1+f)/ln(1001)` — ~1000 fills the cap; ×0.6 dampening for follow-ring patterns (`following > 200` and `> 5× followers`) |
+| Range | `diversity` | 100 | Effective languages = exp(Shannon entropy) over original repos' languages — token one-off repos barely count; 6 balanced languages fill the cap |
+
+Design rules baked into the model: sustained behavior beats burstable counts
+(cadence spans 12 months, so it can't be farmed in a weekend), follow-for-follow
+rings are dampened rather than erased, and diversity uses perplexity so a dozen
+exotic single-repo experiments score below six genuinely used languages.
+Ranks: F <100, D 100+, C 200+, B 350+, A 500+, S 650+, S+ 800+.
 
 ## Tech stack
 

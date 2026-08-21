@@ -2,7 +2,7 @@
 
 import { useRef, useCallback, useState } from 'react';
 import type { ProfileAnalysis } from '../types.js';
-import { getScoreRank } from '../lib/score.js';
+import { getScoreRank, SCORE_MAXIMA } from '../lib/score.js';
 import './ShareCard.css';
 
 interface Props {
@@ -91,9 +91,9 @@ export default function ShareCard({ analysis }: Props) {
     ctx.fillStyle = c.text;
     ctx.font = '500 18px Inter, sans-serif';
     ctx.textAlign = 'left';
-    const breakdownLabels = ['Repos', 'Stars', 'Followers', 'Activity', 'Diversity'];
-    const breakdownValues = [analysis.score.repos, analysis.score.stars, analysis.score.followers, analysis.score.activity, analysis.score.diversity];
-    const breakdownMax = [200, 300, 200, 150, 150];
+    const breakdownLabels = ['Impact', 'Consistency', 'Portfolio', 'Community', 'Range'];
+    const breakdownValues = [analysis.score.stars, analysis.score.activity, analysis.score.repos, analysis.score.followers, analysis.score.diversity];
+    const breakdownMax = [SCORE_MAXIMA.stars, SCORE_MAXIMA.activity, SCORE_MAXIMA.repos, SCORE_MAXIMA.followers, SCORE_MAXIMA.diversity];
     const barX = 60;
     const barW = 400;
     const barH = 8;

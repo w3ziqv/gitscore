@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import type { ScoreBreakdown } from '../types.js';
+import { SCORE_MAXIMA } from '../lib/score.js';
 import './ScoreDisplay.css';
 
 interface Props {
@@ -59,11 +60,11 @@ export default function ScoreDisplay({ score, rank, generatedAtMs, historyPoints
   const fillPct = Math.min(100, (displayed / maxScore) * 100);
 
   const breakdownItems = [
-    { label: 'Repos', value: score.repos, max: 200 },
-    { label: 'Stars', value: score.stars, max: 300 },
-    { label: 'Follow', value: score.followers, max: 200 },
-    { label: 'Activity', value: score.activity, max: 150 },
-    { label: 'Diversity', value: score.diversity, max: 150 },
+    { label: 'Impact', value: score.stars, max: SCORE_MAXIMA.stars },
+    { label: 'Consistency', value: score.activity, max: SCORE_MAXIMA.activity },
+    { label: 'Portfolio', value: score.repos, max: SCORE_MAXIMA.repos },
+    { label: 'Community', value: score.followers, max: SCORE_MAXIMA.followers },
+    { label: 'Range', value: score.diversity, max: SCORE_MAXIMA.diversity },
   ];
 
   return (
