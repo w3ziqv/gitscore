@@ -9,9 +9,9 @@ inputs:
     description: 'GitHub token used to post the comment (usually secrets.GITHUB_TOKEN)'
     required: true
   api-origin:
-    description: 'GitScore API origin (default: https://gitscore-mu.vercel.app)'
+    description: 'GitScore API origin (default: https://gitscore.mateusz-szostak1.workers.dev)'
     required: false
-    default: 'https://gitscore-mu.vercel.app'
+    default: 'https://gitscore.mateusz-szostak1.workers.dev'
   post-on-first-pr-only:
     description: 'Post the comment only on the author first PR ever (default: true)'
     required: false

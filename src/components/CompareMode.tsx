@@ -56,7 +56,7 @@ export default function CompareMode() {
       const data = await apiJson<CompareResult>(
         `/api/compare/${encodeURIComponent(user1.trim())}/${encodeURIComponent(user2.trim())}`,
         undefined,
-        { unreachableHint: 'API unreachable — run `npm run dev:all`, `vercel dev`, or use the Vercel deployment.' },
+        { unreachableHint: 'API unreachable — run `npm run dev` (the Worker serves /api in-workerd), or check the deployment.' },
       );
       setResult(data);
     } catch (err) {

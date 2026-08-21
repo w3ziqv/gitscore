@@ -18,7 +18,7 @@ Live: [gitscore.mateusz-szostak1.workers.dev](https://gitscore.mateusz-szostak1.
 - **Head-to-head** — two users side by side, winner highlighted.
 - **Share card** — download a PNG with score, breakdown and badges.
 - **Leaderboard** — global ranking persisted in Neon Postgres, with a localStorage fallback. Two extra tabs: *Most improved* (score delta over 7/30 days) and *Squad* (your pinned friends).
-- **Embeddable badge** — `![GitScore](https://gitscore-mu.vercel.app/api/badge/w3ziqv)` for READMEs.
+- **Embeddable badge** — `![GitScore](https://gitscore.mateusz-szostak1.workers.dev/api/badge/w3ziqv)` for READMEs.
 
 ## Score algorithm
 
@@ -36,10 +36,10 @@ Stars and followers are logarithmic on purpose: 100k stars should not be worth
 ## Tech stack
 
 - Frontend: React 19 + TypeScript + Vite
-- Backend: Vercel serverless functions (Node.js)
+- Backend: Cloudflare Workers (Hono) — one worker serves both the API and the static assets
 - Database: Neon Postgres (leaderboard, score history) with localStorage fallback
 - Data: GitHub REST API
-- Tests: Vitest — 71 unit tests (score, roast, localization, badge SVG, squad, score history)
+- Tests: Vitest — 80 unit tests (score, roast, localization, badge SVG, squad, score history, webhooks)
 
 ## Run locally
 

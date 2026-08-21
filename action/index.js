@@ -8,7 +8,7 @@
 //
 // Inputs (see action.yml):
 //   - github-token (required)
-//   - api-origin   (default: https://gitscore-mu.vercel.app)
+//   - api-origin   (default: https://gitscore.mateusz-szostak1.workers.dev)
 //   - post-on-first-pr-only ("true" by default)
 //
 // Env:
@@ -21,7 +21,7 @@ const fetch = (...a) => import('node-fetch').then(({ default: f }) => f(...a));
 const FALLBACK_COMMENT = (login) =>
   `### GitScore
 
-> Profile "${login}" could not be analyzed yet. Visit https://gitscore-mu.vercel.app/?u=${login} to seed it.`;
+> Profile "${login}" could not be analyzed yet. Visit https://gitscore.mateusz-szostak1.workers.dev/?u=${login} to seed it.`;
 
 function rankColor(rank) {
   const map = { 'S+': '!', S: '!', A: '', B: '', C: '※', D: '※', F: '※' };
@@ -50,7 +50,7 @@ function buildComment(profile, roast) {
 
 Embeddable badge:
 \`\`\`md
-![GitScore](https://gitscore-mu.vercel.app/api/badge/${login})
+![GitScore](https://gitscore.mateusz-szostak1.workers.dev/api/badge/${login})
 \`\`\`
 `;
 }
@@ -65,7 +65,7 @@ async function isFirstPR(octokit, owner, login) {
 
 async function main() {
   const token = process.env.GITHUB_TOKEN || getInput('github-token');
-  const apiOrigin = (getInput('api-origin') || 'https://gitscore-mu.vercel.app').replace(/\/$/, '');
+  const apiOrigin = (getInput('api-origin') || 'https://gitscore.mateusz-szostak1.workers.dev').replace(/\/$/, '');
   const firstOnly = /^(true|1)$/i.test(getInput('post-on-first-pr-only') || 'true');
 
   if (!token) { setFailed('github-token is required'); return; }

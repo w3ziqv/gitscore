@@ -3,7 +3,7 @@
 // Output is a small 220x44 SVG card with orange rank stripe + rank letter +
 // score number, suitable for dropping into a GitHub README:
 //
-//   ![GitScore](https://gitscore-mu.vercel.app/api/badge/w3ziqv)
+//   ![GitScore](https://gitscore.mateusz-szostak1.workers.dev/api/badge/w3ziqv)
 //
 // Layout (Hard Mistral pixel):
 //   |--stripe--|----label----|-score-|

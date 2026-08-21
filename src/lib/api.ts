@@ -1,8 +1,8 @@
 // src/lib/api.ts — Defensive fetch helpers for the GitScore frontend.
 //
-// Why this exists: when the API layer isn't running (e.g. only `npm run dev`
-// was started without `npm run dev:server` / `vercel dev`), the Vite /api/*
-// proxy returns a non-2xx status with an EMPTY body — and calling
+// Why this exists: when the Worker API isn't running (e.g. only the Vite
+// static server is up without the worker plugin), /api/* returns a non-2xx
+// status with an EMPTY body — and calling
 // `res.json()` on that throws the V8-internal message
 // "Failed to execute 'json' on 'Response': Unexpected end of JSON input",
 // which leaks to the user as the error banner and tells them nothing useful.

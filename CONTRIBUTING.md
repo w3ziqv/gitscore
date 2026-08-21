@@ -20,7 +20,7 @@ Thanks for your interest in contributing!
 
 ```bash
 npm install
-npm run dev:all
+npm run dev      # Vite dev — the Worker serves /api in-workerd, no extra server
 ```
 
 ## Code Style

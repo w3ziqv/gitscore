@@ -84,15 +84,6 @@ async function setCachedAnalysis(username: string, data: ProfileAnalysis): Promi
   }
 }
 
-/** Exported for tests / callers that still want sync memory peek. */
-export function getCachedAnalysisSync(username: string): ProfileAnalysis | null {
-  return getMemoryCached(username);
-}
-
-export function setCachedAnalysisSync(username: string, data: ProfileAnalysis): void {
-  setMemoryCached(username, data);
-}
-
 async function fetchGitHub(path: string): Promise<Response> {
   const headers: Record<string, string> = {
     Accept: 'application/vnd.github.v3+json',

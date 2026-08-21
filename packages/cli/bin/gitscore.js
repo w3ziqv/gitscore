@@ -28,7 +28,7 @@ const ANSI = {
   bgBg: '\x1b[48;5;235m',
 };
 
-const DEFAULT_ORIGIN = 'https://gitscore-mu.vercel.app';
+const DEFAULT_ORIGIN = 'https://gitscore.mateusz-szostak1.workers.dev';
 
 function getEnv(key, fallback) {
   const v = process.env[key];

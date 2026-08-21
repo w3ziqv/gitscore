@@ -147,7 +147,7 @@ export default function ShareCard({ analysis }: Props) {
     ctx.fillStyle = c.footer;
     ctx.font = '400 14px Inter, sans-serif';
     ctx.textAlign = 'right';
-    ctx.fillText('gitscore-mu.vercel.app', W - 60, H - 30);
+    ctx.fillText('gitscore.mateusz-szostak1.workers.dev', W - 60, H - 30);
     ctx.textAlign = 'left';
   }, [analysis]);
 

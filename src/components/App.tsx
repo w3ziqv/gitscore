@@ -85,7 +85,7 @@ export default function App() {
       const data = await apiJson<ProfileAnalysis>(
         `/api/profile/${encodeURIComponent(username)}`,
         undefined,
-        { unreachableHint: 'API unreachable — run `npm run dev:all`, or `vercel dev`, or push to GitHub and use the Vercel deployment.' },
+        { unreachableHint: 'API unreachable — run `npm run dev` (the Worker serves /api in-workerd), or check the deployment.' },
       );
       setAnalysis(data);
       setGeneratedAtMs(Date.now());

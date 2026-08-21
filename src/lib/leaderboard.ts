@@ -4,7 +4,6 @@
 //   saveToLeaderboard(profile)         // upsert score + metadata
 //   getLeaderboard(limit)              // top by total score (global tab)
 //   getImprovedLeaderboard(limit, w)   // top by score-delta over last N days (F6)
-//   getEntry(login)                    // single-entry lookup
 
 import { sql, ensureSchema, isDbConfigured } from './db.js';
 import { getDeltas } from './scoreHistory.js';
@@ -159,30 +158,6 @@ export async function getImprovedLeaderboard(
   } catch (err) {
     console.error('leaderboard improved fetch failed:', err);
     return { entries: [], total: 0 };
-  }
-}
-
-/** Fetch a single entry by login. Returns `null` if missing or DB not configured. */
-export async function getEntry(login: string): Promise<LeaderboardEntry | null> {
-  if (!isDbConfigured()) return null;
-
-  try {
-    await ensureSchema();
-    const s = sql();
-    const rows = (await s`
-      SELECT
-        login, name, avatar_url, score, rank,
-        badges_earned AS "badgesEarned",
-        total_stars   AS "totalStars",
-        followers,
-        analyzed_at_ms AS "analyzedAtMs"
-      FROM leaderboard
-      WHERE login = ${login}
-    `) as LeaderboardRow[];
-    return rows[0] ? toLeaderboardEntry(rows[0]) : null;
-  } catch (err) {
-    console.error('leaderboard getEntry failed:', err);
-    return null;
   }
 }
 

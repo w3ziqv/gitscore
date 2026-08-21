@@ -76,35 +76,6 @@ export async function getLastNDays(login: string, days: number = 30): Promise<nu
  * snapshots before `now - windowDays` and now. Returns 0 if not enough
  * history. Negative `delta` is rare (only when score drops).
  */
-export async function getDelta(login: string, windowDays: number): Promise<number> {
-  if (!isDbConfigured()) return 0;
-  try {
-    await ensureSchema();
-    const s = sql();
-    const windowMs = windowDays * DAY_MS;
-    const now = Date.now();
-    const windowBoundary = now - windowMs;
-    const boundaryRows = (await s`
-      SELECT score
-      FROM score_history
-      WHERE login = ${login} AND captured_at_ms < ${windowBoundary}
-      ORDER BY captured_at_ms DESC
-      LIMIT 1
-    `) as { score: number }[];
-    const recentRows = (await s`
-      SELECT score
-      FROM score_history
-      WHERE login = ${login}
-      ORDER BY captured_at_ms DESC
-      LIMIT 1
-    `) as { score: number }[];
-    if (boundaryRows.length === 0 || recentRows.length === 0) return 0;
-    return recentRows[0].score - boundaryRows[0].score;
-  } catch (err) {
-    console.error('score_history delta failed:', err);
-    return 0;
-  }
-}
 
 /**
  * Compute deltas for several logins in one query (single round-trip). Used by
